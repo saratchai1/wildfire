@@ -1,0 +1,41 @@
+name: Materialize N1 source change
+on:
+  push:
+    branches: [feature/north-station-n1]
+    paths: ['scripts/apply_north.py', '.github/workflows/materialize-north.yml']
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.ref == 'refs/heads/feature/north-station-n1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply narrowly scoped source migration
+        run: |
+          git merge-base --is-ancestor e68215c2a5db8ade616bd458638753668ab7e23c HEAD
+          python3 scripts/apply_north.py
+          for f in core.js app.js siting.js siting-ui.js console-model.js console.js; do node --check "$f"; done
+          node --test tests/*.test.cjs
+          node scripts/assess_roadside_v2.cjs > /tmp/north-screening.json
+          node scripts/build.cjs
+      - name: Commit tested source files on feature branch only
+        run: |
+          git config user.name wildfire-build-bot
+          git config user.email wildfire-build-bot@users.noreply.github.com
+          git add data/plan.js data/plan-v2.json data/plan-before-north.json console-model.js console.js index.html planning.html app.js siting-ui.js siting.js core.js tests/console.test.cjs tests/siting.test.cjs tests/console_browser.py tests/siting_browser.py scripts/assess_roadside_v2.cjs scripts/build.cjs README.md
+          git commit -m 'feat: add exact N1 north coordinate to shared ten-station registry and views'
+          git push origin HEAD:feature/north-station-n1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: north-source-proof
+          path: |
+            qa/screening-v2.json
+            site/version.json

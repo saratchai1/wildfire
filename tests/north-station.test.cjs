@@ -1,0 +1,71 @@
+const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
+const C = require('../core.js'), S = require('../siting.js'), M = require('../console-model.js');
+const box = { window: {} }; vm.runInNewContext(fs.readFileSync('data/plan.js', 'utf8'), box);
+const P = JSON.parse(JSON.stringify(box.window.WILDFIRE_PLAN));
+const old = JSON.parse(fs.readFileSync('data/plan-before-north.json', 'utf8'));
+const N = P.stations.find(s => s.id === 'R10');
+const close = (a,b,e=1e-8) => assert.ok(Math.abs(a-b)<e,`${a} != ${b}`);
+test('N1 exactly preserves user DMS, previous nine stations and the 2km study area', () => {
+ assert.equal(P.stations.length,10); assert.equal(new Set(P.stations.map(s=>s.id)).size,10);
+ assert.equal(new Set(P.stations.map(s=>s.screenLabel)).size,10);
+ assert.deepEqual(P.stations.slice(0,9),old.stations);
+ assert.deepEqual(P,JSON.parse(fs.readFileSync('data/plan-v2.json','utf8')));
+ assert.equal(P.version,'roadside-2km-v3-north'); assert.equal(P.studyRadiusM,2000);
+ assert.deepEqual(P.target,old.target); assert.equal(N.screenLabel,'N1'); assert.equal(N.side,'N');
+ close(N.lat,18+49/60+53.6/3600); close(N.lon,98+51/60+38.5/3600);
+ assert.equal(N.coordinateSource,'USER_DMS'); assert.equal(N.wayId,null); assert.equal(N.hintDistanceM,null);
+ assert.equal(N.gateway,null); assert.equal(N.radioStatus,'NOT_SURVEYED');
+ assert.equal(N.nearbyRoad.wayId,1229003512); assert.equal(N.nearbyRoad.motorVehicle,'private');
+ assert.ok(Math.hypot(...C.delta(P.target,N))>2000);
+ assert.deepEqual(['E','W','N'].map(side=>P.stations.filter(s=>s.side===side).length),[5,4,1]);
+});
+test('N1 adds WX solar budget without changing the two existing gateways', () => {
+ assert.equal(N.kit,'WX'); const kit=P.kits[N.kit],p=C.power(kit,P.powerAssumptions);
+ assert.equal(kit.panelWp,80); assert.equal(kit.batteryV,12.8); assert.equal(kit.batteryAh,30);
+ close(p.autonomyHours,110.592); assert.ok(p.batteryPass);
+ assert.equal(P.stations.filter(s=>P.kits[s.kit].gateway).length,2);
+ assert.equal(P.stations.filter(s=>P.kits[s.kit].weather).length,10);
+ assert.equal(P.stations.reduce((n,s)=>n+P.kits[s.kit].panelWp,0),940);
+ close(P.stations.reduce((n,s)=>n+C.power(P.kits[s.kit],P.powerAssumptions).dailyLoadWh,0),672);
+ close(P.stations.reduce((n,s)=>n+C.power(P.kits[s.kit],P.powerAssumptions).nominalWh,0),4608);
+});
+test('center northbound smoke now intersects N1 but does not falsely cross concentration threshold', () => {
+ const state={...M.initial(P),windToDeg:0}; const pred=M.prediction(P,state);
+ assert.equal(S.screen(old.stations,P.target,{windToDeg:0}).status,'NO_INTERCEPTION');
+ assert.equal(pred.firstArrival.id,'R10'); close(pred.firstArrival.smokeArrivalMin,16.6792619938472,1e-6);
+ assert.equal(pred.firstAlert,null); assert.equal(pred.fieldLatencyVerified,false);
+ assert.equal(M.snapshot(P,{...state,minute:60},pred).alerts.length,0);
+});
+test('north-area fire uses N1 in both views and alerts at its shared calculated time', () => {
+ const state={...M.initial(P),windToDeg:0,source:C.offset(P.target,0,1500),sourceName:'ตอนเหนือของพื้นที่'};
+ const p=M.prediction(P,state); assert.equal(p.firstAlert.id,'R10'); close(p.firstAlert.alertMin,10);
+ const t=p.firstAlert.alertMin;
+ assert.equal(M.snapshot(P,{...state,minute:t-.01},p).alerts.length,0);
+ assert.ok(M.snapshot(P,{...state,minute:t},p).alerts.some(s=>s.id==='R10'));
+ assert.ok(M.events(P,{...state,minute:t},p).some(e=>e.kind==='SUSPECT'&&e.title.includes('N1')));
+ const n=M.comparison(P,state).find(r=>r.bearing===0); close(n.firstAlert.alertMin,t);
+ assert.equal(M.prediction(old,{...state,selected:'R03'}).firstAlert,null);
+});
+test('north-only, east-only, west-only, no-data and west outage semantics remain explicit', () => {
+ const base=M.initial(P);
+ assert.deepEqual(P.stations.filter(s=>M.enabled(s,{...base,availability:'north'})).map(s=>s.id),['R10']);
+ for(const availability of ['east','west'])assert.equal(M.enabled(N,{...base,availability}),false);
+ const none={...base,availability:'none'},p=M.prediction(P,none);
+ assert.equal(M.snapshot(P,none,p).unknown.length,10); assert.equal(p.firstAlert,null);
+ const outage={...base,scenario:'offline',minute:30};
+ const snap=M.snapshot(P,outage); assert.equal(snap.unknown.length,4); assert.equal(snap.rows.find(s=>s.id==='R10').quality,'VALID');
+ assert.ok(M.events(P,{...base,minute:0}).some(e=>e.kind==='START'&&e.detail.includes('10 จุด')));
+});
+test('GeoJSON CSV and KML export N1 as a user coordinate, never as a matched road centerline', () => {
+ const f=S.geojson(P);assert.equal(f.features.length,10);
+ const n=f.features.find(f=>f.properties.id==='R10');
+ close(n.geometry.coordinates[0],N.lon);close(n.geometry.coordinates[1],N.lat);
+ assert.equal(n.properties.coordinate_role,'USER_SUPPLIED_COORDINATE_NOT_SURVEYED');
+ assert.equal(n.properties.osm_way_id,null);assert.equal(n.properties.screenshot_coordinate_uncertainty_m,null);
+ assert.equal(n.properties.gateway_id,null);assert.equal(n.properties.gateway_status,'UNASSIGNED_PENDING_RF_SURVEY');
+ assert.equal(C.csv(P).trim().split(/\r?\n/).length,11);
+ assert.ok(C.csv(P).includes('USER_SUPPLIED_COORDINATE_NOT_SURVEYED'));
+ const kml=C.kml(P); assert.equal((kml.match(/<Placemark>/g)||[]).length,10);
+ const north=kml.split('<Placemark>').find(s=>s.includes('R10'));
+ assert.ok(north.includes('Exact user coordinate'));assert.ok(!north.includes('Road centerline survey anchor'));assert.ok(!north.includes('OSM way null'));
+});
