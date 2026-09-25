@@ -1,7 +1,9 @@
 /* Observation-only inverse screening. No simulator, source coordinate or ignition time input. */
 (function (root) {
   'use strict';
-  const VERSION = 'inverse-footprint-v1';
+  const VERSION = 'inverse-footprint-v1.1-evidence';
+  const EVIDENCE_POLICY = Object.freeze({minDurationSec:30,maxGapSec:90,freshnessSec:120,recentSec:1200});
+  const paired = r => r.valid && r.dp > 25 && r.dc > .2;
   const finite = Number.isFinite;
   const rad = Math.PI / 180, R = 6371008.8;
   const xy = (o, p) => [(p.lon - o.lon) * rad * R * Math.cos(o.lat * rad), (p.lat - o.lat) * rad * R];
@@ -37,7 +39,7 @@
       const windValid = o.windQuality === 'VALID' && finite(o.windFromDeg) && o.windFromDeg >= 0 && o.windFromDeg < 360 && finite(o.windSpeedMps) && o.windSpeedMps >= 0 && o.windSpeedMps <= 50;
       if (!valid) rejected++;
       const s = byId.get(o.stationId), a = windValid ? (o.windFromDeg + 180) * rad : 0;
-      const row = { ...o, t, received, valid, windValid, x: s.x, y: s.y, u: windValid ? o.windSpeedMps * Math.sin(a) : null, v: windValid ? o.windSpeedMps * Math.cos(a) : null, dp: valid ? o.pm25 - o.baselinePm25 : null, dc: valid ? o.co - o.baselineCo : null };
+      const row = { ...o, observedAt: iso(t), receivedAt: iso(received), t, received, valid, windValid, x: s.x, y: s.y, u: windValid ? o.windSpeedMps * Math.sin(a) : null, v: windValid ? o.windSpeedMps * Math.cos(a) : null, dp: valid ? o.pm25 - o.baselinePm25 : null, dc: valid ? o.co - o.baselineCo : null };
       const k = s.id + '/' + t, prev = unique.get(k);
       if (prev && ['pm25','co','baselinePm25','baselineCo','windFromDeg','windSpeedMps','temperatureC','relativeHumidityPct','quality','windQuality'].some(k => prev[k] !== row[k])) throw Error('CONFLICTING_DUPLICATE');
       if (!prev || received < prev.received) unique.set(k, row);
@@ -46,20 +48,89 @@
     const series = new Map(stations.map(s => [s.id, rows.filter(r => r.stationId === s.id)]));
     return { asOf, origin, stations, rows, series, rejected, future };
   }
+  // Fixed-site UI validation is separate from the generic observation solver.
+  function prepareForPlan(input, plan) {
+    const p = prepare(input), c = input.domain.center;
+    if (input.domain.radiusM !== plan.studyRadiusM || Math.abs(c.lat-plan.target.lat)>1e-8 || Math.abs(c.lon-plan.target.lon)>1e-8) throw Error('DOMAIN_MISMATCH: พื้นที่ศึกษาไม่ตรงกับแผนที่ของโครงการ');
+    if (p.stations.length !== plan.stations.length || p.stations.some(s => {
+      const a = plan.stations.find(a => a.id === s.id);
+      return !a || Math.abs(a.lat-s.lat)>1e-8 || Math.abs(a.lon-s.lon)>1e-8;
+    })) throw Error('REGISTRY_MISMATCH: พิกัดและรหัสต้องตรงสถานี 10 จุดของแผนนี้');
+    return p;
+  }
   function evidence(p) {
     const entries = p.stations.map(s => {
-      const rows = p.series.get(s.id), latest = rows.at(-1), fresh = !!latest && latest.valid && p.asOf - latest.t <= 120;
-      let first = null, previous = null, lastConfirmed = null;
+      const rows = p.series.get(s.id), latest = rows.at(-1);
+      const fresh = !!latest && latest.valid && p.asOf-latest.t <= EVIDENCE_POLICY.freshnessSec;
+      let first = null, previous = null, positiveSince = null, lastConfirmed = null;
       for (const r of rows) {
-        const positive = r.valid && r.dp > 25 && r.dc > .2;
-        if (positive && previous && r.t - previous.t >= 30 && r.t - previous.t <= 90) { if (first === null) first = r.t; lastConfirmed = r.t; }
-        previous = positive ? r : null;
+        if (!paired(r)) { previous = null; positiveSince = null; continue; }
+        if (!previous || r.t-previous.t > EVIDENCE_POLICY.maxGapSec) positiveSince = r.t;
+        if (r.t-positiveSince >= EVIDENCE_POLICY.minDurationSec) {
+          if (first === null) first = r.t;
+          lastConfirmed = r.t;
+        }
+        previous = r;
       }
-      const active = fresh && lastConfirmed === latest.t;
-      return { id: s.id, lat: s.lat, lon: s.lon, status: !fresh ? 'UNKNOWN' : active ? 'SUSPECT' : latest.dp > 25 ? 'PARTICULATE_ONLY' : 'NO_ANOMALY', firstSignalAt: first === null ? null : iso(first), recentSignal: fresh && lastConfirmed !== null && lastConfirmed >= p.asOf - 1200, observedAt: latest?.observedAt || null, pm25: fresh ? latest.pm25 : null, co: fresh ? latest.co : null, dp: fresh ? latest.dp : null, dc: fresh ? latest.dc : null, windFromDeg: latest?.windValid && p.asOf - latest.t <= 120 ? latest.windFromDeg : null, windSpeedMps: latest?.windValid && p.asOf - latest.t <= 120 ? latest.windSpeedMps : null, temperatureC: fresh && finite(latest.temperatureC) ? latest.temperatureC : null, relativeHumidityPct: fresh && finite(latest.relativeHumidityPct) ? latest.relativeHumidityPct : null };
+      const active = fresh && lastConfirmed !== null && lastConfirmed === latest.t;
+      const recentSignal = lastConfirmed !== null && lastConfirmed >= p.asOf-EVIDENCE_POLICY.recentSec;
+      return { id:s.id, lat:s.lat, lon:s.lon,
+        status:!fresh?'UNKNOWN':active?'SUSPECT':paired(latest)?'PENDING':latest.dp>25?'PARTICULATE_ONLY':'NO_ANOMALY',
+        health:!fresh?'DATA_GAP':'FRESH', firstSignalAt:first===null?null:iso(first),
+        lastConfirmedAt:lastConfirmed===null?null:iso(lastConfirmed), recentSignal,
+        observedAt:latest?.observedAt||null, pm25:fresh?latest.pm25:null, co:fresh?latest.co:null,
+        dp:fresh?latest.dp:null, dc:fresh?latest.dc:null,
+        windFromDeg:latest?.windValid && p.asOf-latest.t<=120?latest.windFromDeg:null,
+        windSpeedMps:latest?.windValid && p.asOf-latest.t<=120?latest.windSpeedMps:null,
+        temperatureC:fresh && finite(latest.temperatureC)?latest.temperatureC:null,
+        relativeHumidityPct:fresh && finite(latest.relativeHumidityPct)?latest.relativeHumidityPct:null };
     });
-    const alerts = entries.filter(e => e.status === 'SUSPECT'), first = entries.map(e => e.firstSignalAt).filter(Boolean).sort()[0] || null;
-    return { entries, alerts, firstSignalAt: first, online: entries.filter(e => e.status !== 'UNKNOWN').length };
+    const alerts=entries.filter(e=>e.status==='SUSPECT'), historical=entries.filter(e=>e.firstSignalAt);
+    const first=historical.map(e=>e.firstSignalAt).sort()[0]||null;
+    const gapIds=historical.filter(e=>e.health==='DATA_GAP').map(e=>e.id);
+    const incident={status:alerts.length?'ACTIVE_SIGNAL':historical.length?(gapIds.length?'HISTORICAL_SIGNAL_DATA_GAP':'HISTORICAL_SIGNAL'):'NONE',
+      firstSignalAt:first, evidenceStationIds:historical.map(e=>e.id), dataGapStationIds:gapIds,
+      lastConfirmedAt:historical.map(e=>e.lastConfirmedAt).sort().at(-1)||null,
+      closure:'NOT_ASSESSED', persistence:'INPUT_HISTORY_ONLY'};
+    return {entries, alerts, firstSignalAt:first, incident, online:entries.filter(e=>e.health==='FRESH').length};
+  }
+  // Keep event information at its REAL measurement time. No maxima masquerading
+  // as bin-end readings; weights approximate temporal support, not sample count.
+  function selectSamples(p) {
+    const samples=[];
+    for (const station of p.stations) {
+      const rows=p.series.get(station.id).filter(r=>r.t>=p.asOf-EVIDENCE_POLICY.recentSec);
+      const chosen=new Set(), bins=new Map();
+      const keep=r=>{if(r?.valid)chosen.add(r);};
+      const kind=r=>!r.valid?'invalid':paired(r)?'paired':r.dp>25?'particulate':'quiet';
+      let since=null, prev=null, confirmed=false;
+      for (let i=0;i<rows.length;i++) {
+        const r=rows[i];
+        if (r.valid) {const key=Math.floor(r.t/120);if(!bins.has(key))bins.set(key,[]);bins.get(key).push(r);}
+        if (i && (kind(rows[i-1])!==kind(r) || r.t-rows[i-1].t>90)) {keep(rows[i-1]);keep(r);}
+        if (!paired(r)) {since=null;prev=null;confirmed=false;continue;}
+        if (!prev || r.t-prev.t>90) {since=r.t;confirmed=false;keep(r);}
+        if (!confirmed && r.t-since>=30) {keep(prev);keep(r);confirmed=true;}
+        prev=r;
+      }
+      for (const bin of bins.values()) {
+        keep(bin[0]);keep(bin.at(-1));
+        keep(bin.reduce((a,b)=>b.dp>a.dp?b:a));keep(bin.reduce((a,b)=>b.dc>a.dc?b:a));
+      }
+      const mass=new Map([...chosen].map(r=>[r,0]));
+      for (let i=0;i<rows.length;i++) {
+        const r=rows[i];if(!r.valid)continue;
+        // Midpoint time support, capped at a supported gap. Never bridge invalid rows.
+        const left=i&&rows[i-1].valid?Math.min(90,r.t-rows[i-1].t)/2:0;
+        const right=i+1<rows.length&&rows[i+1].valid?Math.min(90,rows[i+1].t-r.t)/2:0;
+        const choices=bins.get(Math.floor(r.t/120)).filter(x=>chosen.has(x));
+        const near=choices.reduce((a,b)=>Math.abs(b.t-r.t)<Math.abs(a.t-r.t)?b:a);
+        mass.set(near,mass.get(near)+Math.max(1,left+right));
+      }
+      const total=[...mass.values()].reduce((a,b)=>a+b,0);
+      for (const r of [...chosen].sort((a,b)=>a.t-b.t)) samples.push({...r,fitWeight:mass.get(r)/total});
+    }
+    return samples;
   }
   function windAt(p, x, y, t, biasDeg) {
     let u = 0, v = 0, weight = 0;
@@ -87,17 +158,17 @@
   const huber = r => Math.abs(r) <= 2 ? .5 * r * r : 2 * Math.abs(r) - 2;
   function fit(q, samples) {
     let a = 0, bp = 0, bc = 0;
-    for (let i=0;i<samples.length;i++) { a += q[i] * q[i]; bp += q[i] * samples[i].dp / 8; bc += q[i] * samples[i].dc / .06; }
+    for (let i=0;i<samples.length;i++) { const w=samples[i].fitWeight; a += w*q[i]*q[i]; bp += w*q[i]*samples[i].dp/8; bc += w*q[i]*samples[i].dc/.06; }
     if (a < 1e-12) return { loss: Infinity, gp: 0, gc: 0 };
     let gp = Math.max(0,bp/a), gc = Math.max(0,bc/a);
     for (let k=0;k<2;k++) {
       let ap=0, ac=0; bp=0; bc=0;
-      for (let i=0;i<samples.length;i++) { const yp=samples[i].dp/8,yc=samples[i].dc/.06,wp=Math.min(1,2/Math.max(.001,Math.abs(yp-gp*q[i]))),wc=Math.min(1,2/Math.max(.001,Math.abs(yc-gc*q[i]))); ap+=wp*q[i]*q[i];ac+=wc*q[i]*q[i];bp+=wp*q[i]*yp;bc+=wc*q[i]*yc; }
+      for (let i=0;i<samples.length;i++) { const yp=samples[i].dp/8,yc=samples[i].dc/.06,wp=samples[i].fitWeight*Math.min(1,2/Math.max(.001,Math.abs(yp-gp*q[i]))),wc=samples[i].fitWeight*Math.min(1,2/Math.max(.001,Math.abs(yc-gc*q[i]))); ap+=wp*q[i]*q[i];ac+=wc*q[i]*q[i];bp+=wp*q[i]*yp;bc+=wc*q[i]*yc; }
       gp=Math.max(0,bp/Math.max(ap,1e-12));gc=Math.max(0,bc/Math.max(ac,1e-12));
     }
     let loss=0; const residuals=Object.create(null);
-    for(let i=0;i<samples.length;i++) { const v=(huber(samples[i].dp/8-gp*q[i])+huber(samples[i].dc/.06-gc*q[i]))/2; loss+=v; const id=samples[i].stationId; (residuals[id] ||= []).push(v); }
-    const values=Object.values(residuals).map(a=>a.reduce((x,y)=>x+y,0)/a.length);
+    for(let i=0;i<samples.length;i++) { const v=(huber(samples[i].dp/8-gp*q[i])+huber(samples[i].dc/.06-gc*q[i]))/2; loss+=v; const id=samples[i].stationId; (residuals[id] ||= []).push(v*samples[i].fitWeight); }
+    const values=Object.values(residuals).map(a=>a.reduce((x,y)=>x+y,0));
     return { loss: values.reduce((x,y)=>x+y,0)/values.length, gp, gc };
   }
   function scoreCandidate(candidate, traces, samples, starts) {
@@ -123,18 +194,20 @@
     return out.sort((a,b)=>a.bestLoss-b.bestLoss).map((g,i)=>({id:'ZONE-'+(i+1),...g}));
   }
   function infer(input) {
-    const p=prepare(input), e=evidence(p); const support=e.entries.filter(r=>r.recentSignal); const base={modelVersion:VERSION,asOf:input.asOf,fieldValidated:false,probability:null,confidenceLevel:null,mode:'OBSERVATION_ONLY_UNCALIBRATED_SCREENING',firstSignalAt:e.firstSignalAt,evidence:e.entries,online:e.online,anomalousStations:support.map(r=>r.id),currentAnomalousStations:e.alerts.map(r=>r.id),sampleCount:0,discardedRecords:p.rejected,futureRecordsExcluded:p.future,cells:[],zones:[],estimatedIgnitionAt:null,releaseWindow:null,warnings:['NOT_A_FIRE_CONFIRMATION','NO_TERRAIN_OR_CANOPY_DISPERSION_SOLVER','FIT_SCORE_IS_NOT_PROBABILITY'],searchRadiusM:4000,resolutionM:200,refinementM:100};
+    const p=prepare(input), e=evidence(p); const support=e.entries.filter(r=>r.recentSignal); const base={modelVersion:VERSION,asOf:iso(p.asOf),fieldValidated:false,probability:null,confidenceLevel:null,mode:'OBSERVATION_ONLY_UNCALIBRATED_SCREENING',firstSignalAt:e.firstSignalAt,incident:e.incident,evidence:e.entries,online:e.online,anomalousStations:support.map(r=>r.id),currentAnomalousStations:e.alerts.map(r=>r.id),sampleCount:0,discardedRecords:p.rejected,futureRecordsExcluded:p.future,cells:[],zones:[],estimatedIgnitionAt:null,releaseWindow:null,warnings:['NOT_A_FIRE_CONFIRMATION','NO_TERRAIN_OR_CANOPY_DISPERSION_SOLVER','FIT_SCORE_IS_NOT_PROBABILITY'],searchRadiusM:4000,resolutionM:200,refinementM:100};
     if(!e.online)return {...base,status:'INSUFFICIENT_DATA'};
-    if(!support.length)return {...base,status:e.entries.some(r=>r.status==='PARTICULATE_ONLY')?'PARTICULATE_ONLY':'NO_SIGNAL'};
-    const samples=[];
-    for(const station of p.stations){if(e.entries.find(r=>r.id===station.id).status==='UNKNOWN')continue;
-      const rows=p.series.get(station.id).filter(r=>r.valid && r.t>=p.asOf-1200), selected=new Map();
-      for(const r of rows)selected.set(Math.floor(r.t/120),r);
-      samples.push(...selected.values());
-    }
+    if(!support.length)return {...base,status:e.firstSignalAt?'SIGNAL_HISTORY':e.entries.some(r=>r.status==='PENDING')?'PENDING':e.entries.some(r=>r.status==='PARTICULATE_ONLY')?'PARTICULATE_ONLY':'NO_SIGNAL'};
+    const samples=selectSamples(p);
     base.sampleCount=samples.length;
+    base.solverPositiveCount=samples.filter(paired).length;
+    base.solverSupportStationIds=[...new Set(samples.filter(paired).map(r=>r.stationId))];
+    base.assessmentDataStatus=e.incident.dataGapStationIds.length?'HISTORICAL_EVIDENCE_DATA_GAP':e.alerts.length?'CURRENT_AND_RECENT_EVIDENCE':'HISTORICAL_EVIDENCE';
+    base.supportDataThrough=e.incident.lastConfirmedAt;
+    if(e.incident.dataGapStationIds.length)base.warnings.push('SIGNAL_STATION_DATA_GAP_HISTORY_RETAINED');
     if(samples.length<6)return {...base,status:'INSUFFICIENT_DATA'};
-    const withWind=support.filter(r=>r.windSpeedMps!==null && r.windSpeedMps>=.3);
+    if(support.some(r=>!base.solverSupportStationIds.includes(r.id)))return {...base,status:'INSUFFICIENT_DATA',warnings:[...base.warnings,'SUPPORT_MISSING_FROM_SOLVER']};
+    // Wind history is evaluated at observation time, not only at the latest packet.
+    const withWind=samples.filter(r=>paired(r) && (windAt(p,r.x,r.y,r.t,0)?.speed||0)>=.3);
     if(!withWind.length)return {...base,status:'WIND_UNAVAILABLE'};
     const oldest=Math.max(p.asOf-1800, Math.min(...p.rows.map(r=>r.t))), starts=[];
     for(let t=Math.floor(p.asOf/120)*120;t>=oldest;t-=120)starts.push(t);
@@ -171,6 +244,6 @@
       directionalCorridors:support.map(s=>({stationId:s.id,points:trace(p,p.series.get(s.id).filter(r=>r.valid).at(-1),0,.16).map(t=>geo(p.origin,t.x,t.y))})),
       warnings:[...base.warnings,...(support.length<3?['FEW_INDEPENDENT_STATIONS']:[]),...(disagreement>600?['SENSITIVE_TO_WIND_ASSUMPTIONS']:[]),...(badFit?['SINGLE_SOURCE_MODEL_POOR_FIT_MULTIPLE_OR_EXTERNAL_POSSIBLE']:[]),...(boundary?['SOURCE_MAY_BE_BEYOND_SEARCH_BUFFER']:[])]};
   }
-  const api={VERSION,prepare,evidence,infer,xy,geo};
+  const api={VERSION,EVIDENCE_POLICY,prepare,prepareForPlan,evidence,selectSamples,infer,xy,geo};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;root.WildfireInverse=api;
 })(typeof window!=='undefined'?window:globalThis);
