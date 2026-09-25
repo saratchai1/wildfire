@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "source_commit": "9681cc273b066ca021d53b3429836e3e7a364b98",
+  "source_commit": "de030c8fcd765099485e8e613941e626fb2a291d",
   "browser": "Chromium via Playwright",
   "external_basemaps": "blocked deliberately; offline fallback tested",
   "tests": [
@@ -35,5 +35,5 @@
   ],
   "runtime_errors": [],
   "field_commissioning": "NOT_PERFORMED",
-  "history_source_commit": "9681cc273b066ca021d53b3429836e3e7a364b98"
+  "history_source_commit": "de030c8fcd765099485e8e613941e626fb2a291d"
 }
