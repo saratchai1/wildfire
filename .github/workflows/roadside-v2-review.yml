@@ -1,0 +1,26 @@
+name: Roadside v2 corridor evidence
+on:
+  push:
+    branches: [design/roadside-2km-v2]
+    paths: ['scripts/review_roadside_v2.py', '.github/workflows/roadside-v2-review.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  review:
+    if: github.ref == 'refs/heads/design/roadside-2km-v2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python scripts/review_roadside_v2.py
+      - name: Commit derived desktop evidence only
+        run: |
+          git config user.name 'wildfire-qa-bot'
+          git config user.email 'wildfire-qa-bot@users.noreply.github.com'
+          git add qa/roadside-v2-review.json qa/roadside-v2-lines.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'data: record screenshot corridor to OSM comparison [skip ci]'
+          git push origin HEAD:design/roadside-2km-v2

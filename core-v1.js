@@ -37,19 +37,19 @@
   function rawReading(station, minute, options) {
     if (options.scenario === 'offline' && minute >= 12 && station.side === 'W') return { quality: 'STALE', pm: null, co: null, lastMinute: 12, synthetic: true };
     const index = Number(station.id.slice(1));
-    const baselinePm = 15;
-    const baselineCo = 0.15;
+    const baselinePm = 14 + index % 3;
+    const baselineCo = 0.12;
     const age = Math.max(0, minute - 5);
     const [dx, dy] = delta(options.source, station);
     const angle = radians(options.windToDeg);
     const along = dx * Math.sin(angle) + dy * Math.cos(angle);
     const cross = dx * Math.cos(angle) - dy * Math.sin(angle);
     const distance = Math.hypot(dx, dy);
-    const local = Math.exp(-(distance ** 2) / (2 * 85 ** 2));
-    const plume = options.windSpeedMps > 0 && along >= 0 && along <= options.windSpeedMps * age * 60 ? Math.exp(-(cross ** 2) / (2 * (90 + along * 0.18) ** 2)) * Math.exp(-along / 900) : 0;
-    const smoke = options.scenario === 'smoke' ? Math.max(local, plume) * (1 - Math.exp(-age / 8)) : 0;
+    const local = Math.exp(-(distance ** 2) / (2 * 120 ** 2));
+    const plume = options.windSpeedMps > 0 && along >= 0 && along <= options.windSpeedMps * age * 60 ? Math.exp(-(cross ** 2) / (2 * (100 + along * 0.18) ** 2)) * Math.exp(-along / 4200) : 0;
+    const smoke = options.scenario === 'smoke' ? Math.max(local, plume) * (1 - Math.exp(-age / 4)) : 0;
     const dust = options.scenario === 'dust' && minute >= 8 && station.side === 'E' ? 75 : 0;
-    return { quality: 'VALID', pm: baselinePm + 130 * smoke + dust, co: baselineCo + 0.85 * smoke, baselinePm, baselineCo, synthetic: true, lastMinute: minute };
+    return { quality: 'VALID', pm: baselinePm + 300 * smoke + dust, co: baselineCo + 1.2 * smoke, baselinePm, baselineCo, synthetic: true, lastMinute: minute };
   }
   function reading(station, minute, options) {
     if (!finite(minute) || minute < 0 || minute > 60 || !['smoke', 'dust', 'offline'].includes(options.scenario) || !finite(options.windToDeg) || !finite(options.windSpeedMps) || options.windSpeedMps < 0) throw new Error('Invalid demo inputs');

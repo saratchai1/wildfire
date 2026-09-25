@@ -1,0 +1,15 @@
+    <section id="analysis-controls" class="analysis-controls" hidden aria-label="ประเมินแผนตามทิศลม">
+      <div class="analysis-heading"><div><p class="eyebrow">2 KM STUDY AREA · NOT CERTIFIED COVERAGE</p><h2>ควันจะถึงจุดไหน และใช้เวลานานเท่าไร?</h2><p>ทดสอบทั้งวง 12.57 ตร.กม. ไม่ใช่เฉพาะจุดที่ลมพัดเข้าหาเซนเซอร์</p></div><button id="screen-export" class="button-outline">↓ ส่งออกผลและสมมติฐาน</button></div>
+      <div class="analysis-warning"><b>นี่คือการคัดกรองทางเดินควัน ไม่ใช่เวลาตรวจไฟที่รับประกัน</b><span>ลมคงที่ · สมมติควันเกิดทันทีและอยู่ระดับช่องรับอากาศ · ยังไม่คิดควันลอยสูง การเจือจาง เรือนยอด และลมตามภูเขา จึงอาจเร็วเกินจริงหรือพลาดเหตุได้</span></div>
+      <div class="screen-inputs">
+        <label>จุดปล่อยควันสมมติ<select id="screen-source"><option value="center">หมุดกลางภูเขา</option><option value="north">เหนือหมุดกลาง 1.5 กม.</option><option value="south">ใต้หมุดกลาง 1.5 กม.</option><option value="near">ใกล้ E3 ระยะ 100 ม.</option><option value="custom">ตำแหน่งที่ดับเบิลคลิกแผนที่</option></select></label>
+        <label>ลมพัดไป <strong id="screen-wind-label"></strong><input id="screen-wind" type="range" min="0" max="359" value="90"></label>
+        <label>ความเร็วลม <strong id="screen-speed-label"></strong><input id="screen-speed" type="range" min="0" max="5" step="0.5" value="2"></label>
+        <label>ครึ่งมุมแนวควันสมมติ <strong id="screen-angle-label"></strong><input id="screen-angle" type="range" min="5" max="35" step="5" value="20"></label>
+        <label>เวลาที่อยากทดสอบ<select id="screen-goal"><option value="5">ภายใน 5 นาที</option><option value="10" selected>ภายใน 10 นาที</option><option value="15">ภายใน 15 นาที</option><option value="30">ภายใน 30 นาที</option></select></label>
+        <label>สถานีที่สมมติพร้อมใช้งาน<select id="screen-availability"><option value="all">ครบ 9 จุด</option><option value="east">เฉพาะตะวันออก 5 จุด</option><option value="west">เฉพาะตะวันตก 4 จุด</option><option value="none">ไม่มีจุดพร้อมใช้งาน</option></select></label>
+      </div>
+      <details class="screen-assumptions"><summary>สมมติฐานเวลา / พื้นที่รับควัน และความหมายของสี</summary><p>เวลา = ระยะตามแนวลม ÷ ความเร็วลม + รออ่านค่า 30 วินาที + ตรวจต่อเนื่อง 60 วินาที + ส่งข้อมูล 30 วินาที รวมส่วนอุปกรณ์ 2 นาที ยังไม่รวมเวลาก่อควันและการยืนยันโดยเจ้าหน้าที่</p><p>ครึ่งความกว้างแนวควัน = 25 ม. + ระยะตามลม × tan(ครึ่งมุม) เป็นรูปทรงทดสอบ ไม่ใช่รัศมีตรวจจับที่ผู้ผลิตรับรอง จุดทดสอบเว้น 250 ม. รวมทุกจุดในวงและ 16 ทิศลม น้ำหนักเท่ากัน ไม่ใช่สถิติลมจริง</p></details>
+      <div id="screen-source-summary" class="screen-source-summary" aria-live="polite"></div>
+      <div class="screen-legend"><span><i class="swatch green"></i>เข้าแนวควันและทันเวลาที่ตั้ง</span><span><i class="swatch orange"></i>เข้าแนวควัน แต่ช้ากว่าเป้าหมาย</span><span><i class="swatch purple"></i>ไม่เข้าแนวในฉากนี้ / เกิน 60 นาที</span><span><i class="swatch gray"></i>ประเมินไม่ได้</span><label><input id="screen-grid" type="checkbox" checked> แสดงจุดทดลองบนแผนที่ (ไม่ใช่จุดติดตั้ง)</label></div>
+    </section>

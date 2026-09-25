@@ -1,0 +1,628 @@
+{
+  "status": "COMPUTED_NOT_FIELD_VALIDATED",
+  "sourceHash": "55e80f17c003e4e6c2b239d53b8530c51ac98845e2e5cacc9a4478c884a49653",
+  "model": "CONSTANT_WIND_GEOMETRIC_INTERCEPTION_NOT_DETECTION",
+  "defaults": {
+    "windToDeg": 90,
+    "windSpeedMps": 2,
+    "halfAngleDeg": 20,
+    "captureWidthM": 25,
+    "sampleSec": 30,
+    "persistenceSec": 60,
+    "uplinkSec": 30,
+    "horizonMin": 60,
+    "goalMin": 10
+  },
+  "studyRadiusM": 2000,
+  "areaKm2": 12.566370614359172,
+  "sourceCount": 197,
+  "directionCount": 16,
+  "scenarioCountPerRun": 3152,
+  "stationCount": 9,
+  "fieldDetectionProbability": null,
+  "fieldLatencyVerified": false,
+  "sensitivity": [
+    {
+      "windSpeedMps": 0.5,
+      "halfAngleDeg": 5,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 44,
+        "intercepted": 520,
+        "beyondHorizon": 301,
+        "noInterception": 2331,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.013959390862944163,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 7,
+        "intercepted": 184,
+        "beyondHorizon": 428,
+        "noInterception": 2540,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.002220812182741117,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 0.5,
+      "halfAngleDeg": 20,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 76,
+        "intercepted": 1324,
+        "beyondHorizon": 314,
+        "noInterception": 1514,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.024111675126903553,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 15,
+        "intercepted": 511,
+        "beyondHorizon": 802,
+        "noInterception": 1839,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.004758883248730965,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 0.5,
+      "halfAngleDeg": 35,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 116,
+        "intercepted": 1880,
+        "beyondHorizon": 127,
+        "noInterception": 1145,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.03680203045685279,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 22,
+        "intercepted": 824,
+        "beyondHorizon": 1026,
+        "noInterception": 1302,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.006979695431472081,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 1,
+      "halfAngleDeg": 5,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 106,
+        "intercepted": 814,
+        "beyondHorizon": 7,
+        "noInterception": 2331,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.03362944162436548,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 19,
+        "intercepted": 512,
+        "beyondHorizon": 100,
+        "noInterception": 2540,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.006027918781725888,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 1,
+      "halfAngleDeg": 20,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 237,
+        "intercepted": 1638,
+        "beyondHorizon": 0,
+        "noInterception": 1514,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.07519035532994923,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 53,
+        "intercepted": 1214,
+        "beyondHorizon": 99,
+        "noInterception": 1839,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.01681472081218274,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 1,
+      "halfAngleDeg": 35,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 377,
+        "intercepted": 2007,
+        "beyondHorizon": 0,
+        "noInterception": 1145,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.11960659898477158,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 91,
+        "intercepted": 1783,
+        "beyondHorizon": 67,
+        "noInterception": 1302,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.028870558375634518,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 2,
+      "halfAngleDeg": 5,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 264,
+        "intercepted": 821,
+        "beyondHorizon": 0,
+        "noInterception": 2331,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.08375634517766498,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 63,
+        "intercepted": 612,
+        "beyondHorizon": 0,
+        "noInterception": 2540,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.01998730964467005,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 2,
+      "halfAngleDeg": 20,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 697,
+        "intercepted": 1638,
+        "beyondHorizon": 0,
+        "noInterception": 1514,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.22112944162436549,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 173,
+        "intercepted": 1313,
+        "beyondHorizon": 0,
+        "noInterception": 1839,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.054885786802030455,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 2,
+      "halfAngleDeg": 35,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 1101,
+        "intercepted": 2007,
+        "beyondHorizon": 0,
+        "noInterception": 1145,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.3493020304568528,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 303,
+        "intercepted": 1850,
+        "beyondHorizon": 0,
+        "noInterception": 1302,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.09612944162436549,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 4,
+      "halfAngleDeg": 5,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 574,
+        "intercepted": 821,
+        "beyondHorizon": 0,
+        "noInterception": 2331,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.18210659898477158,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 221,
+        "intercepted": 612,
+        "beyondHorizon": 0,
+        "noInterception": 2540,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.07011421319796954,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 4,
+      "halfAngleDeg": 20,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 1427,
+        "intercepted": 1638,
+        "beyondHorizon": 0,
+        "noInterception": 1514,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.4527284263959391,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 604,
+        "intercepted": 1313,
+        "beyondHorizon": 0,
+        "noInterception": 1839,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.1916243654822335,
+        "fieldDetectionProbability": null
+      }
+    },
+    {
+      "windSpeedMps": 4,
+      "halfAngleDeg": 35,
+      "v2": {
+        "total": 3152,
+        "withinGoal": 1952,
+        "intercepted": 2007,
+        "beyondHorizon": 0,
+        "noInterception": 1145,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.6192893401015228,
+        "fieldDetectionProbability": null
+      },
+      "v1": {
+        "total": 3152,
+        "withinGoal": 956,
+        "intercepted": 1850,
+        "beyondHorizon": 0,
+        "noInterception": 1302,
+        "unknown": 0,
+        "scenarioFractionWithinGoal": 0.3032994923857868,
+        "fieldDetectionProbability": null
+      }
+    }
+  ],
+  "center": [
+    {
+      "windToDeg": 0,
+      "status": "NO_INTERCEPTION",
+      "first": null,
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 22.5,
+      "status": "NO_INTERCEPTION",
+      "first": null,
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 45,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R01",
+        "label": "E1",
+        "distanceM": 1117.391738516654,
+        "alongM": 1089.3994919621377,
+        "crossM": 248.54183595102552,
+        "minutes": 11.078329099684481,
+        "widthM": 421.50898829894106,
+        "travelMin": 9.078329099684481,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 67.5,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R02",
+        "label": "E2",
+        "distanceM": 792.9133105926319,
+        "alongM": 790.2382667055497,
+        "crossM": 65.07687722360484,
+        "minutes": 8.585318889212914,
+        "widthM": 312.6232070589366,
+        "travelMin": 6.585318889212914,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": {
+        "id": "R01",
+        "label": "E1",
+        "distanceM": 1117.391738516654,
+        "alongM": 1101.5867362200727,
+        "crossM": 187.27242159292553,
+        "minutes": 11.179889468500606,
+        "widthM": 425.9447824465611,
+        "travelMin": 9.179889468500606,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "legacy": {
+        "id": "R02",
+        "thresholdCrossingMin": 7.5,
+        "conditionalAlertMin": 9.5,
+        "model": "LEGACY_SYNTHETIC_KERNEL_NOT_VALIDATED",
+        "withinHorizon": true
+      }
+    },
+    {
+      "windToDeg": 90,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R02",
+        "label": "E2",
+        "distanceM": 792.9133105926319,
+        "alongM": 754.9888031599834,
+        "crossM": 242.2878973824805,
+        "minutes": 8.291573359666529,
+        "widthM": 299.79345155449886,
+        "travelMin": 6.291573359666528,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": null,
+      "legacy": {
+        "id": "R02",
+        "thresholdCrossingMin": 27.5,
+        "conditionalAlertMin": 29.5,
+        "model": "LEGACY_SYNTHETIC_KERNEL_NOT_VALIDATED",
+        "withinHorizon": true
+      }
+    },
+    {
+      "windToDeg": 112.5,
+      "status": "NO_INTERCEPTION",
+      "first": null,
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 135,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R03",
+        "label": "E3",
+        "distanceM": 553.7929244212539,
+        "alongM": 552.2599820744383,
+        "crossM": 41.176635828898526,
+        "minutes": 6.602166517286986,
+        "widthM": 226.00619505148202,
+        "travelMin": 4.602166517286986,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": {
+        "id": "R04",
+        "label": "E4",
+        "distanceM": 1150.351311399364,
+        "alongM": 1108.4092513972864,
+        "crossM": 307.7938775465553,
+        "minutes": 11.236743761644053,
+        "widthM": 428.4279748938963,
+        "travelMin": 9.236743761644053,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "legacy": {
+        "id": "R03",
+        "thresholdCrossingMin": 5,
+        "conditionalAlertMin": 7,
+        "model": "LEGACY_SYNTHETIC_KERNEL_NOT_VALIDATED",
+        "withinHorizon": true
+      }
+    },
+    {
+      "windToDeg": 157.5,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R03",
+        "label": "E3",
+        "distanceM": 553.7929244212539,
+        "alongM": 525.9793103958739,
+        "crossM": 173.29849443813868,
+        "minutes": 6.383160919965616,
+        "widthM": 216.44081282396178,
+        "travelMin": 4.383160919965616,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": {
+        "id": "R04",
+        "label": "E4",
+        "distanceM": 1150.351311399364,
+        "alongM": 1141.8242385325862,
+        "crossM": 139.8053930923855,
+        "minutes": 11.515201987771551,
+        "widthM": 440.5900355895335,
+        "travelMin": 9.515201987771551,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "legacy": {
+        "id": "R03",
+        "thresholdCrossingMin": 9,
+        "conditionalAlertMin": 11,
+        "model": "LEGACY_SYNTHETIC_KERNEL_NOT_VALIDATED",
+        "withinHorizon": true
+      }
+    },
+    {
+      "windToDeg": 180,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R05",
+        "label": "E5",
+        "distanceM": 1759.558258525523,
+        "alongM": 1728.5559436926997,
+        "crossM": 328.84588285397615,
+        "minutes": 16.404632864105828,
+        "widthM": 654.1429117680683,
+        "travelMin": 14.40463286410583,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 202.5,
+      "status": "NO_INTERCEPTION",
+      "first": null,
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 225,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R08",
+        "label": "W3",
+        "distanceM": 1434.7913262453453,
+        "alongM": 1393.4885031282693,
+        "crossM": 341.7834716867003,
+        "minutes": 13.612404192735577,
+        "widthM": 532.1883369308557,
+        "travelMin": 11.612404192735577,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": {
+        "id": "R09",
+        "label": "W4",
+        "distanceM": 1960.0840195429903,
+        "alongM": 1960.00913634142,
+        "crossM": 17.133275401017386,
+        "minutes": 18.33340946951183,
+        "widthM": 738.3849845180836,
+        "travelMin": 16.33340946951183,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "legacy": null
+    },
+    {
+      "windToDeg": 247.5,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R08",
+        "label": "W3",
+        "distanceM": 1434.7913262453453,
+        "alongM": 1418.2103789007208,
+        "crossM": 217.4982092964246,
+        "minutes": 13.818419824172674,
+        "widthM": 541.1863638472549,
+        "travelMin": 11.818419824172674,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 270,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R07",
+        "label": "W2",
+        "distanceM": 1257.013603903147,
+        "alongM": 1245.9262455945427,
+        "crossM": 166.58628675933937,
+        "minutes": 12.382718713287856,
+        "widthM": 478.48006748745564,
+        "travelMin": 10.382718713287856,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 292.5,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R07",
+        "label": "W2",
+        "distanceM": 1257.013603903147,
+        "alongM": 1214.8355693254478,
+        "crossM": 322.88967140386035,
+        "minutes": 12.12362974437873,
+        "widthM": 467.1639867622985,
+        "travelMin": 10.12362974437873,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": {
+        "id": "R06",
+        "label": "W1",
+        "distanceM": 1382.680055033338,
+        "alongM": 1354.3079332281145,
+        "crossM": 278.66495399024865,
+        "minutes": 13.28589944356762,
+        "widthM": 517.9277757256132,
+        "travelMin": 11.28589944356762,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "legacy": null
+    },
+    {
+      "windToDeg": 315,
+      "status": "INTERCEPTED",
+      "first": {
+        "id": "R06",
+        "label": "W1",
+        "distanceM": 1382.680055033338,
+        "alongM": 1357.8578412999657,
+        "crossM": 260.81836094721484,
+        "minutes": 13.315482010833048,
+        "widthM": 519.2198365981483,
+        "travelMin": 11.315482010833048,
+        "delayMin": 2,
+        "status": "INTERCEPTED"
+      },
+      "second": null,
+      "legacy": null
+    },
+    {
+      "windToDeg": 337.5,
+      "status": "NO_INTERCEPTION",
+      "first": null,
+      "second": null,
+      "legacy": null
+    }
+  ]
+}

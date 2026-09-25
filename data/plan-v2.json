@@ -1,5 +1,4 @@
-/* ROADSIDE_2KM_V2; screenshot-derived road anchors, not surveyed foundations. */
-window.WILDFIRE_PLAN = {
+{
   "version": "roadside-2km-v2",
   "status": "PROPOSED_FOR_FIELD_SURVEY",
   "target": {
@@ -329,4 +328,4 @@ window.WILDFIRE_PLAN = {
       "conditional": false
     }
   ]
-};
+}

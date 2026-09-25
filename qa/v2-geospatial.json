@@ -1,0 +1,101 @@
+[
+  {
+    "id": "R01",
+    "label": "E1",
+    "lat": 18.8189027,
+    "lon": 98.8712384,
+    "wayId": 696213525,
+    "rawRoadDistanceM": 0.002973784110757445,
+    "hintDistanceM": 18,
+    "distanceM": 1117.4,
+    "restriction": "private"
+  },
+  {
+    "id": "R02",
+    "label": "E2",
+    "lat": 18.8157345,
+    "lon": 98.869423,
+    "wayId": 696213525,
+    "rawRoadDistanceM": 0.0009448464101680083,
+    "hintDistanceM": 38.5,
+    "distanceM": 792.9,
+    "restriction": "private"
+  },
+  {
+    "id": "R03",
+    "label": "E3",
+    "lat": 18.8097818,
+    "lon": 98.8656835,
+    "wayId": 696213512,
+    "rawRoadDistanceM": 0.0026283584589395083,
+    "hintDistanceM": 10.8,
+    "distanceM": 553.8,
+    "restriction": "private"
+  },
+  {
+    "id": "R04",
+    "label": "E4",
+    "lat": 18.8045497,
+    "lon": 98.8676286,
+    "wayId": 255517026,
+    "rawRoadDistanceM": 0,
+    "hintDistanceM": 99.7,
+    "distanceM": 1150.4,
+    "restriction": "private"
+  },
+  {
+    "id": "R05",
+    "label": "E5",
+    "lat": 18.7980103,
+    "lon": 98.8653743,
+    "wayId": 1215941741,
+    "rawRoadDistanceM": 0,
+    "hintDistanceM": 107.2,
+    "distanceM": 1759.6,
+    "restriction": "private"
+  },
+  {
+    "id": "R06",
+    "label": "W1",
+    "lat": 18.8205318,
+    "lon": 98.8513756,
+    "wayId": 1112030805,
+    "rawRoadDistanceM": 0,
+    "hintDistanceM": 117.9,
+    "distanceM": 1382.7,
+    "restriction": "private"
+  },
+  {
+    "id": "R07",
+    "label": "W2",
+    "lat": 18.8150537,
+    "lon": 98.8504127,
+    "wayId": 1238533290,
+    "rawRoadDistanceM": 0,
+    "hintDistanceM": 110.7,
+    "distanceM": 1257,
+    "restriction": "private"
+  },
+  {
+    "id": "R08",
+    "label": "W3",
+    "lat": 18.8068676,
+    "lon": 98.8505923,
+    "wayId": 1125539934,
+    "rawRoadDistanceM": 0.0016021525314911726,
+    "hintDistanceM": 47.4,
+    "distanceM": 1434.8,
+    "restriction": "private"
+  },
+  {
+    "id": "R09",
+    "label": "W4",
+    "lat": 18.8009826,
+    "lon": 98.8491976,
+    "wayId": 964524419,
+    "rawRoadDistanceM": 0,
+    "hintDistanceM": 6.9,
+    "distanceM": 1960.1,
+    "restriction": "unknown"
+  }
+]

@@ -1,4 +1,4 @@
-"""Evidence/history UI on the real static build. External imagery is not required."""
+"""Preserved v1 evidence/history regression on the real static build."""
 import json
 import os
 from pathlib import Path
@@ -10,7 +10,7 @@ with sync_playwright() as p:
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.route("**/*", lambda route: route.continue_() if route.request.url.startswith("http://localhost:4173/") else route.abort())
-    page.goto("http://localhost:4173/", wait_until="networkidle")
+    page.goto("http://localhost:4173/v1.html", wait_until="networkidle")
     assert page.locator('.telemetry-history').count() == 0
     page.locator('[data-view="demo"]').click()
     page.locator('#source').select_option('R03')
@@ -51,6 +51,6 @@ with sync_playwright() as p:
 summary_path = Path('qa/latest.json')
 summary = json.loads(summary_path.read_text()) if summary_path.exists() else {"status": "PASS", "tests": [], "runtime_errors": []}
 summary['history_source_commit'] = os.environ.get('GITHUB_SHA', 'local')
-summary['tests'].append({"name": "Legacy-inspired PM/CO history, chronological network events, stale gaps, acknowledgement, restart and mobile layout", "status": "PASS"})
+summary['tests'].append({"name": "Preserved v1 PM/CO history, chronological network events, stale gaps, acknowledgement, restart and mobile layout", "status": "PASS"})
 summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf8')
-print('PASS: real browser history and timeline workflow; zero runtime errors.')
+print('PASS: preserved v1 browser history and timeline; zero runtime errors.')

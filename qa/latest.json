@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "source_commit": "de030c8fcd765099485e8e613941e626fb2a291d",
+  "source_commit": "6ece8feb0a96f2f482d1e88e3db16b386dea89ec",
   "browser": "Chromium via Playwright",
   "external_basemaps": "blocked deliberately; offline fallback tested",
   "tests": [
@@ -29,11 +29,11 @@
       "status": "PASS"
     },
     {
-      "name": "Legacy-inspired PM/CO history, chronological network events, stale gaps, acknowledgement, restart and mobile layout",
+      "name": "Preserved v1 PM/CO history, chronological network events, stale gaps, acknowledgement, restart and mobile layout",
       "status": "PASS"
     }
   ],
   "runtime_errors": [],
   "field_commissioning": "NOT_PERFORMED",
-  "history_source_commit": "de030c8fcd765099485e8e613941e626fb2a291d"
+  "history_source_commit": "6ece8feb0a96f2f482d1e88e3db16b386dea89ec"
 }

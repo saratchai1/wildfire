@@ -16,7 +16,7 @@ def run():
         page.on('pageerror',lambda error:errors.append(str(error)))
         # Proves core app works offline; optional basemap failure must remain visible and recoverable.
         page.route('https://**/*',lambda route:route.abort())
-        page.goto('http://127.0.0.1:4173/',wait_until='networkidle')
+        page.goto('http://127.0.0.1:4173/v1.html',wait_until='networkidle')
         expect(page.locator('[data-select]')).to_have_count(8)
         page.wait_for_function('window.WildfireApp && document.querySelectorAll("[data-map-node]").length === 8')
         def station_workflow():

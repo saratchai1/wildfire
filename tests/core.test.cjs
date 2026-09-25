@@ -2,9 +2,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const C = require('../core.js');
+const C = require('../core-v1.js');
 const sandbox = { window: {} };
-vm.runInNewContext(fs.readFileSync('data/plan.js', 'utf8'), sandbox);
+vm.runInNewContext(fs.readFileSync('data/plan-v1.js', 'utf8'), sandbox);
 const plan = sandbox.window.WILDFIRE_PLAN;
 const close = (a, b, tolerance = 1e-6) => assert.ok(Math.abs(a - b) <= tolerance, `${a} != ${b}`);
 
