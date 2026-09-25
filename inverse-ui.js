@@ -23,7 +23,7 @@ class ObservationMap extends window.WildfireMapView{
 const map=new ObservationMap('inverse-map',P,window.WILDFIRE_CONTEXT, id=>{selected=id;render();},point=>{if(view!=='principles'||imported)return;spec.point=point;newScene();});
 function analyze(){
  const id=++requestId;clearFailure();busy=true;$('computing').textContent='กำลังคำนวณพื้นที่…';$('export-report').disabled=true;
- packet=imported||fixture.packetAt(minute);
+ packet=imported||fixture.packetAt(minute); $('ack').disabled=true; $('situation').textContent='กำลังวิเคราะห์ข้อมูลชุดใหม่ · ยังไม่ใช้ผลเดิมตัดสินชุดนี้';
  if(worker)worker.postMessage({id,packet});else setTimeout(()=>{try{receive({id,result:I.infer(packet)});}catch(e){receive({id,error:e.message});}},0);
 }
 function receive(data){if(data.id!==requestId)return;busy=false;$('computing').textContent='';if(data.error){report=null;fail(data.error);$('situation').textContent='ไม่สามารถประมวลผลชุดข้อมูลนี้ได้';return;}
@@ -40,7 +40,7 @@ function revealResult(){const box=$('truth-result');box.hidden=!revealed||view!=
  const truth=fixture.truth;const lines=truth.sources.map(s=>{const hits=report.cells.filter(c=>{const[x,y]=I.xy(c,s);return Math.abs(x)<=c.sizeM/2&&Math.abs(y)<=c.sizeM/2;});const best=report.cells.reduce((a,b)=>!a||b.fitLoss<a.fitLoss?b:a,null),distance=best?Math.hypot(...I.xy(s,best)):null;return 'เฉลย '+s.lat.toFixed(6)+', '+s.lon.toFixed(6)+' · '+(!report.cells.length?'ยังไม่มีพื้นที่ให้เปรียบเทียบ':hits.length?'อยู่ในพื้นที่ที่ยังเป็นไปได้':'ไม่อยู่ในพื้นที่ที่ระบบเสนอ')+(distance!==null?' · จุดคะแนนต่ำสุดห่างเฉลย '+Math.round(distance)+' ม.':'');});
  box.innerHTML='<b>เฉลยจากตัวสร้างฉากเท่านั้น — ไม่ได้ส่งเข้า Worker</b>'+lines.map(esc).join('<br>')+'<p>ผลสังเคราะห์รายฉาก ไม่ใช่ความแม่นยำภาคสนาม · สูตรปล่อยควันไม่ใช่สูตรเดียวกับตัววิเคราะห์</p>';
 }
-function render(){if(!report)return;
+function render(){if(!report||busy)return;
  $('clock').textContent=time(packet.asOf)+' น. (ข้อมูล)';$('minute').value=minute;$('minute').disabled=!!imported;$('play').disabled=!!imported;$('restart').disabled=!!imported;$('play').textContent=playing?'Ⅱ พักข้อมูล':'▶ เล่นข้อมูล';
  $('data-mode').textContent=imported?'ข้อมูลนำเข้า · ยังไม่ตรวจสอบ / ไม่ใช่ Live':'● ข้อมูลจำลอง · ยังไม่ใช่ระบบแจ้งเตือนจริง';
  const st=statuses[report.status]||['ยังประเมินไม่ได้',''];$('situation').className='situation'+(['NO_SIGNAL','PARTICULATE_ONLY'].includes(report.status)?'':' warn');$('situation').innerHTML='<div><strong>'+st[0]+'</strong><p>'+st[1]+'</p></div>';
@@ -57,7 +57,7 @@ function render(){if(!report)return;
  if(ackAt)events.unshift('<li><time>'+time(ackAt)+'</time><div><b>รับทราบสัญญาณในหน้านี้</b><p>ไม่ใช่การยืนยันไฟ</p></div></li>');$('events').innerHTML=events.join('');
  revealResult();map.show(report,selected,view==='principles'&&revealed&&!imported?fixture.truth:null);
 }
-function route(){view=location.hash==='#principles'?'principles':'dashboard';playing=false;revealed=false;for(const v of ['dashboard','principles']){$(v).hidden=view!==v;$('nav-'+v).toggleAttribute('aria-current',view===v);if(view===v)$('nav-'+v).setAttribute('aria-current','page');}$('principles-extra').hidden=view!=='principles';$('truth-result').hidden=true;$('truth-result').replaceChildren();$('reveal').textContent='เปิดเฉลยจุดกำเนิดควัน';$('truth-lat').value='';$('truth-lon').value='';$('direction-table').replaceChildren();render();}
+function route(){view=location.hash==='#principles'?'principles':'dashboard';playing=false;revealed=false;for(const v of ['dashboard','principles']){$(v).hidden=view!==v;$('nav-'+v).toggleAttribute('aria-current',view===v);if(view===v)$('nav-'+v).setAttribute('aria-current','page');}$('principles-extra').hidden=view!=='principles';$('truth-result').hidden=true;$('truth-result').replaceChildren();$('reveal').textContent='เปิดเฉลยจุดกำเนิดควัน';$('truth-lat').value='';$('truth-lon').value='';$('direction-table').replaceChildren();if(report)map.show(report,selected,null);render();}
 function newScene(){try{fixture=G.generate(P,spec);imported=null;minute=0;playing=false;revealed=false;ackAt=null;history=[];$('reveal').disabled=false;$('direction-table').replaceChildren();analyze();}catch(e){fail(e.message);}}
 $('apply-scene').onclick=()=>{const old=spec;spec={...spec,preset:$('lab-preset').value,windToDeg:Number($('lab-wind').value),windSpeedMps:$('lab-speed').value.trim()?Number($('lab-speed').value):NaN};try{G.generate(P,spec);newScene();}catch(e){spec=old;fail(e.message);}};
 $('apply-truth').onclick=()=>{if(view!=='principles')return;const point={lat:$('truth-lat').value.trim()?Number($('truth-lat').value):NaN,lon:$('truth-lon').value.trim()?Number($('truth-lon').value):NaN};try{G.generate(P,{...spec,point});spec={...spec,point};newScene();}catch(e){fail(e.message);}};
@@ -66,7 +66,7 @@ $('replay').onclick=()=>{revealed=false;location.hash='dashboard';};
 $('minute').oninput=()=>{playing=false;const next=Number($('minute').value);if(next<minute){ackAt=null;history=[];}minute=next;analyze();};
 $('play').onclick=()=>{if(imported)return;if(minute>=60){minute=0;ackAt=null;history=[];}playing=!playing;render();};
 $('restart').onclick=()=>{minute=0;playing=false;ackAt=null;history=[];analyze();};
-$('ack').onclick=()=>{if(report?.firstSignalAt&&ackAt===null){ackAt=report.asOf;render();}};
+$('ack').onclick=()=>{if(!busy&&report?.firstSignalAt&&ackAt===null){ackAt=report.asOf;render();}};
 $('station-table').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
 $('basemap').onchange=()=>map.setBasemap($('basemap').value);
 $('export-report').onclick=()=>{if(report&&!busy)sendDownload('wildfire-observation-only-report.json',{schemaVersion:1,planVersion:P.version,report,assessmentHistory:history,acknowledgedAt:ackAt,mode:imported?'IMPORTED_UNVERIFIED':'SYNTHETIC_DEMO'});};

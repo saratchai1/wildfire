@@ -39,7 +39,7 @@
       const s = byId.get(o.stationId), a = windValid ? (o.windFromDeg + 180) * rad : 0;
       const row = { ...o, t, received, valid, windValid, x: s.x, y: s.y, u: windValid ? o.windSpeedMps * Math.sin(a) : null, v: windValid ? o.windSpeedMps * Math.cos(a) : null, dp: valid ? o.pm25 - o.baselinePm25 : null, dc: valid ? o.co - o.baselineCo : null };
       const k = s.id + '/' + t, prev = unique.get(k);
-      if (prev && JSON.stringify({ ...prev, receivedAt: null, received: null }) !== JSON.stringify({ ...row, receivedAt: null, received: null })) throw Error('CONFLICTING_DUPLICATE');
+      if (prev && ['pm25','co','baselinePm25','baselineCo','windFromDeg','windSpeedMps','temperatureC','relativeHumidityPct','quality','windQuality'].some(k => prev[k] !== row[k])) throw Error('CONFLICTING_DUPLICATE');
       if (!prev || received < prev.received) unique.set(k, row);
     }
     const rows = [...unique.values()].sort((a,b) => a.t - b.t || a.stationId.localeCompare(b.stationId));
@@ -49,14 +49,14 @@
   function evidence(p) {
     const entries = p.stations.map(s => {
       const rows = p.series.get(s.id), latest = rows.at(-1), fresh = !!latest && latest.valid && p.asOf - latest.t <= 120;
-      let first = null, previous = null, lastSignal = null;
+      let first = null, previous = null, lastConfirmed = null;
       for (const r of rows) {
         const positive = r.valid && r.dp > 25 && r.dc > .2;
-        if (positive && previous && r.t - previous.t >= 30 && r.t - previous.t <= 90 && first === null) first = r.t;
-        if (positive) lastSignal = r.t; previous = positive ? r : null;
+        if (positive && previous && r.t - previous.t >= 30 && r.t - previous.t <= 90) { if (first === null) first = r.t; lastConfirmed = r.t; }
+        previous = positive ? r : null;
       }
-      const active = fresh && latest.dp > 25 && latest.dc > .2 && first !== null;
-      return { id: s.id, lat: s.lat, lon: s.lon, status: !fresh ? 'UNKNOWN' : active ? 'SUSPECT' : latest.dp > 25 ? 'PARTICULATE_ONLY' : 'NO_ANOMALY', firstSignalAt: first === null ? null : iso(first), recentSignal: fresh && first !== null && lastSignal >= p.asOf - 1200, observedAt: latest?.observedAt || null, pm25: fresh ? latest.pm25 : null, co: fresh ? latest.co : null, dp: fresh ? latest.dp : null, dc: fresh ? latest.dc : null, windFromDeg: latest?.windValid && p.asOf - latest.t <= 120 ? latest.windFromDeg : null, windSpeedMps: latest?.windValid && p.asOf - latest.t <= 120 ? latest.windSpeedMps : null, temperatureC: fresh && finite(latest.temperatureC) ? latest.temperatureC : null, relativeHumidityPct: fresh && finite(latest.relativeHumidityPct) ? latest.relativeHumidityPct : null };
+      const active = fresh && lastConfirmed === latest.t;
+      return { id: s.id, lat: s.lat, lon: s.lon, status: !fresh ? 'UNKNOWN' : active ? 'SUSPECT' : latest.dp > 25 ? 'PARTICULATE_ONLY' : 'NO_ANOMALY', firstSignalAt: first === null ? null : iso(first), recentSignal: fresh && lastConfirmed !== null && lastConfirmed >= p.asOf - 1200, observedAt: latest?.observedAt || null, pm25: fresh ? latest.pm25 : null, co: fresh ? latest.co : null, dp: fresh ? latest.dp : null, dc: fresh ? latest.dc : null, windFromDeg: latest?.windValid && p.asOf - latest.t <= 120 ? latest.windFromDeg : null, windSpeedMps: latest?.windValid && p.asOf - latest.t <= 120 ? latest.windSpeedMps : null, temperatureC: fresh && finite(latest.temperatureC) ? latest.temperatureC : null, relativeHumidityPct: fresh && finite(latest.relativeHumidityPct) ? latest.relativeHumidityPct : null };
     });
     const alerts = entries.filter(e => e.status === 'SUSPECT'), first = entries.map(e => e.firstSignalAt).filter(Boolean).sort()[0] || null;
     return { entries, alerts, firstSignalAt: first, online: entries.filter(e => e.status !== 'UNKNOWN').length };
@@ -95,7 +95,7 @@
       for (let i=0;i<samples.length;i++) { const yp=samples[i].dp/8,yc=samples[i].dc/.06,wp=Math.min(1,2/Math.max(.001,Math.abs(yp-gp*q[i]))),wc=Math.min(1,2/Math.max(.001,Math.abs(yc-gc*q[i]))); ap+=wp*q[i]*q[i];ac+=wc*q[i]*q[i];bp+=wp*q[i]*yp;bc+=wc*q[i]*yc; }
       gp=Math.max(0,bp/Math.max(ap,1e-12));gc=Math.max(0,bc/Math.max(ac,1e-12));
     }
-    let loss=0; const residuals={};
+    let loss=0; const residuals=Object.create(null);
     for(let i=0;i<samples.length;i++) { const v=(huber(samples[i].dp/8-gp*q[i])+huber(samples[i].dc/.06-gc*q[i]))/2; loss+=v; const id=samples[i].stationId; (residuals[id] ||= []).push(v); }
     const values=Object.values(residuals).map(a=>a.reduce((x,y)=>x+y,0)/a.length);
     return { loss: values.reduce((x,y)=>x+y,0)/values.length, gp, gc };
@@ -118,7 +118,7 @@
     while(remaining.size) { const queue=[remaining.values().next().value], group=[];remaining.delete(queue[0]);
       while(queue.length){const i=queue.pop(),a=cells[i];group.push(a);for(const j of [...remaining]){const b=cells[j];if(Math.hypot(a.x-b.x,a.y-b.y)<=Math.max(a.size,b.size)*1.51){remaining.delete(j);queue.push(j);}}}
       const area=group.reduce((s,c)=>s+c.size*c.size,0)/1e6, xs=group.map(c=>c.x),ys=group.map(c=>c.y);
-      out.push({ cellCount:group.length,areaKm2:area,bounds:[geo(origin,Math.min(...xs)-100,Math.min(...ys)-100),geo(origin,Math.max(...xs)+100,Math.max(...ys)+100)],bestLoss:Math.min(...group.map(c=>c.loss)),outsideStudy:group.some(c=>Math.hypot(c.x,c.y)>2000) });
+      out.push({ cellCount:group.length,areaKm2:area,bounds:[geo(origin,Math.min(...group.map(c=>c.x-c.size/2)),Math.min(...group.map(c=>c.y-c.size/2))),geo(origin,Math.max(...group.map(c=>c.x+c.size/2)),Math.max(...group.map(c=>c.y+c.size/2)))],bestLoss:Math.min(...group.map(c=>c.loss)),outsideStudy:group.some(c=>Math.hypot(c.x,c.y)>2000) });
     }
     return out.sort((a,b)=>a.bestLoss-b.bestLoss).map((g,i)=>({id:'ZONE-'+(i+1),...g}));
   }
@@ -165,7 +165,7 @@
     const status=support.length<2?'DIRECTIONAL_ONLY':badFit?'MODEL_MISMATCH':external?'EXTERNAL_POSSIBLE':support.length<3||areaKm2>2||disagreement>600||zoneList.length>1?'AMBIGUOUS':'CANDIDATE_AREAS';
     const onsets=cells.map(c=>c.onset).filter(finite), min=onsets.length?Math.min(...onsets):null,max=onsets.length?Math.max(...onsets):null;
     return {...base,status,fitLoss:nominal.loss,ensembleDisagreementM:disagreement,areaKm2,singleSourceAssumption:true,externalPossible:external,searchBoundaryReached:boundary,
-      releaseWindow:min===null?null:{earliest:iso(min),latest:iso(Math.min(p.asOf,max+120)),leftCensored:min<=oldest+120,meaning:'EFFECTIVE_SMOKE_RELEASE_NOT_IGNITION'},
+      releaseWindow:min===null||badFit||support.length<2?null:{earliest:iso(min),latest:iso(Math.min(p.asOf,max+120)),leftCensored:min<=oldest+120,meaning:'EFFECTIVE_SMOKE_RELEASE_NOT_IGNITION'},
       cells:badFit||support.length<2?[]:cells.map(c=>({...geo(p.origin,c.x,c.y),sizeM:c.size,fitLoss:c.loss,fitClass:c.loss<=nominal.loss+.3?'BETTER_FIT':'ALTERNATIVE_FIT'})),
       zones:badFit||support.length<2?[]:zoneList,
       directionalCorridors:support.map(s=>({stationId:s.id,points:trace(p,p.series.get(s.id).filter(r=>r.valid).at(-1),0,.16).map(t=>geo(p.origin,t.x,t.y))})),
