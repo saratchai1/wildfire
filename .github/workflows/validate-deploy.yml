@@ -2,7 +2,7 @@ name: Validate and deploy roadside pilot
 on:
   workflow_dispatch:
   push:
-    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3, feature/north-station-n1, feature/inverse-source-v1]
+    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3, feature/north-station-n1, feature/inverse-source-v1, fix/inverse-review-integrity]
     paths-ignore: ['qa/**', 'README.md']
   pull_request:
     branches: [main]
@@ -51,6 +51,7 @@ jobs:
           python tests/siting_browser.py
           python tests/legacy_console_regression.py
           python tests/inverse_browser.py
+          python tests/review_browser.py
       - name: Require immutable application sources
         if: always()
         run: |
@@ -106,6 +107,7 @@ jobs:
                   version=json.loads(get('version.json'))
                   assert version['sourceCommit']==expected and version['appVersion']=='inverse-source-v1',version
                   assert version['planVersion']=='roadside-2km-v3-north' and version['stationCount']==10,version
+                  assert version['modelVersion']=='inverse-footprint-v1.1-evidence',version
                   assert version['primaryViews']==['dashboard','principles'] and version['fieldValidated'] is False
                   for file,digest in version['assets'].items():
                       assert hashlib.sha256(get(file)).hexdigest()==digest,file
