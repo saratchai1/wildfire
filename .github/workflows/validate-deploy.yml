@@ -28,7 +28,8 @@ jobs:
         run: |
           node --check core.js
           node --check app.js
-          node --test tests/core.test.cjs
+          node --check history.js
+          node --test tests/*.test.cjs
       - name: Build static portable application
         run: node scripts/build.cjs
       - uses: actions/setup-python@v5
@@ -42,6 +43,7 @@ jobs:
         run: |
           python -m http.server 4173 --directory site >/tmp/wildfire-http.log 2>&1 &
           python tests/browser.py
+          python tests/history_browser.py
       - name: Portable offline-capable application
         run: |
           cd site

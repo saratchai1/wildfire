@@ -1,0 +1,20 @@
+.telemetry-history { border-top: 1px solid #dde5df; margin-top: 20px; padding-top: 12px; }
+.history-note { font-size: 11px; line-height: 1.7; color: #62756c; margin: 5px 0 10px; }
+.history-chart { margin: 12px 0; border: 1px solid #e0e8e2; border-radius: 10px; padding: 9px; background: #fafcf9; }
+.history-chart figcaption { display: flex; justify-content: space-between; color: #244d3a; font-size: 12px; font-weight: 700; }
+.history-chart figcaption span { color: #63776c; font-weight: 400; }
+.history-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.history-chart svg text { fill: #63776c; font-size: 9px; font-family: inherit; }
+.history-grid { fill: none; stroke: #e0e8e2; stroke-width: .7; }
+.history-line { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.history-line.pm { stroke: #27765b; }
+.history-line.co { stroke: #b66b2d; }
+.history-point { fill: #27765b; }
+.history-threshold { fill: none; stroke: #94715a; stroke-dasharray: 4 3; stroke-width: 1; }
+.history-empty { margin: 0; font-size: 11px; color: #7b6b55; }
+.history-events { margin: 0; padding: 0; list-style: none; }
+.history-events li { display: grid; grid-template-columns: 45px minmax(0, 1fr); gap: 9px; padding: 9px 0; border-bottom: 1px solid #edf0eb; }
+.history-events time { color: #687e71; font-size: 10px; }
+.history-events b { display: block; font-size: 11px; line-height: 1.7; color: #254837; }
+.history-events small { display: block; font-size: 10px; line-height: 1.7; color: #657c6d; }
+.history-ack { font-size: 11px; padding: 9px; background: #edf3eb; border-radius: 6px; }
