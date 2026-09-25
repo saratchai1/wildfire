@@ -64,6 +64,7 @@ try:
     else:expect(page.locator('#alert-time')).to_contain_text('ยังระบุ')
    page.locator('#compass [data-bearing="90"]').click()
    s=state();assert s['estimate']['firstArrival']['smokeArrivalMin']<s['estimate']['firstAlert']['alertMin']
+   expect(page.locator('#toast')).to_be_hidden(timeout=6000)
    page.screenshot(path=str(qa/'console-principles-desktop.jpg'),type='jpeg',quality=70,full_page=True)
   record('Interactive eight-direction table separates smoke transport from concentration alert',learn)
   def shared():
@@ -79,6 +80,8 @@ try:
   def unknown_and_source():
    slider('#learn-speed',0);assert state()['estimate']['geometryStatus']=='CALM_UNKNOWN'
    expect(page.locator('#arrival-time')).to_contain_text('ลมสงบ')
+   page.get_by_text('สมมติฐานและสถานีพร้อมใช้งาน',exact=True).click()
+   expect(page.locator('#availability')).to_be_visible()
    page.locator('#availability').select_option('none');assert state()['estimate']['firstAlert'] is None
    expect(page.locator('#alert-time')).to_have_text('ไม่มีสถานีพร้อม')
    page.locator('#availability').select_option('all');slider('#learn-speed',2);page.locator('#smoke-delay').select_option('0')
@@ -101,6 +104,7 @@ try:
   def mobile_and_fallback():
    page.set_viewport_size({'width':375,'height':812})
    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+   expect(page.locator('#toast')).to_be_hidden(timeout=6000)
    page.screenshot(path=str(qa/'console-principles-mobile.jpg'),type='jpeg',quality=65,full_page=True)
    page.locator('[data-basemap="learn"]').select_option('satellite')
    expect(page.locator('#learn-map .map-error')).to_be_visible();expect(page.locator('#learn-map [data-station]')).to_have_count(9)
