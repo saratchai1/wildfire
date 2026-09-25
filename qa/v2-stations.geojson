@@ -1,0 +1,284 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R01",
+        "screen_label": "E1",
+        "kit": "HUB",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 696213525,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 18,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 150,
+        "battery_v": 12.8,
+        "battery_ah": 60
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8712384,
+          18.8189027
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R02",
+        "screen_label": "E2",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 696213525,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 38.5,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.869423,
+          18.8157345
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R03",
+        "screen_label": "E3",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 696213512,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 10.8,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8656835,
+          18.8097818
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R04",
+        "screen_label": "E4",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 255517026,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 99.7,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8676286,
+          18.8045497
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R05",
+        "screen_label": "E5",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 1215941741,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 107.2,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8653743,
+          18.7980103
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R06",
+        "screen_label": "W1",
+        "kit": "HUB",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 1112030805,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 117.9,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 150,
+        "battery_v": 12.8,
+        "battery_ah": 60
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8513756,
+          18.8205318
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R07",
+        "screen_label": "W2",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 1238533290,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 110.7,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8504127,
+          18.8150537
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R08",
+        "screen_label": "W3",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 1125539934,
+        "highway": "track",
+        "surface": "unpaved",
+        "motor_vehicle": "private",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 47.4,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": true,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8505923,
+          18.8068676
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "R09",
+        "screen_label": "W4",
+        "kit": "WX",
+        "status": "PROPOSED_FOR_FIELD_SURVEY",
+        "coordinate_role": "SCREENSHOT_TO_ROAD_SURVEY_ANCHOR_NOT_FOUNDATION",
+        "osm_way_id": 964524419,
+        "highway": "residential",
+        "surface": "unknown",
+        "motor_vehicle": "unknown",
+        "access": "unknown",
+        "permission_status": "NOT_VERIFIED",
+        "solar_status": "NOT_SURVEYED",
+        "radio_status": "NOT_SURVEYED",
+        "screenshot_match_error_m": 6.9,
+        "screenshot_coordinate_uncertainty_m": 150,
+        "conditional": false,
+        "panel_wp": 80,
+        "battery_v": 12.8,
+        "battery_ah": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.8491976,
+          18.8009826
+        ]
+      }
+    }
+  ]
+}

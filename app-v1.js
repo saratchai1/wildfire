@@ -31,7 +31,7 @@
     $('site-list').innerHTML = stations.filter(s => state.side === 'all' || s.side === state.side).map(s => {
       const status = readings ? readings.get(s.id).status : 'PROPOSED';
       const extra = status === 'SUSPECT' ? 'suspect' : status === 'UNKNOWN' ? 'unknown' : '';
-      const subtitle = state.view === 'demo' ? status === 'SUSPECT' ? 'PM + CO ผิดปกติ · จำลอง' : status === 'UNKNOWN' ? 'ไม่มีข้อมูลใหม่ · จำลอง' : 'ไม่พบสัญญาณตามฉาก' : plan.kits[s.kit].name + (s.conditional ? ' · ทางดิน*' : '');
+      const subtitle = state.view === 'demo' ? status === 'SUSPECT' ? 'PM + CO ผิดปกติ · จำลอง' : status === 'UNKNOWN' ? 'ไม่มีข้อมูลใหม่ · จำลอง' : 'ไม่พบสัญญาณตามฉาก' : plan.kits[s.kit].name + (s.conditional ? ' · ทางบริการ*' : '');
       return '<button class="site-card ' + (s.id === state.selected ? 'selected' : '') + '" data-select="' + s.id + '" aria-pressed="' + (s.id === state.selected) + '" aria-label="เลือกสถานี ' + s.id + ' ' + escape(s.label) + '"><span class="site-id ' + kitClass(s) + ' ' + extra + '">' + s.id + '</span><span><strong>' + escape(s.label) + '</strong><small>' + escape(subtitle) + '</small></span></button>';
     }).join('');
   }
@@ -46,7 +46,7 @@
       const statusText = r.status === 'UNKNOWN' ? 'ขาดข้อมูลฝั่งตะวันตกตั้งแต่นาที 12 · ไม่ใช่พื้นที่ปลอดภัย' : r.status === 'SUSPECT' ? 'PM + CO เพิ่มต่อเนื่องตามเกณฑ์เดโม · ยังไม่ยืนยันไฟ' : state.scenario === 'dust' && s.side === 'E' ? 'PM เพิ่ม แต่ CO ไม่เพิ่ม · ไม่จัดเป็น PM + CO ผิดปกติ' : 'ไม่พบสัญญาณตามเกณฑ์ฉากนี้ · ไม่ใช่การยืนยันว่าไม่มีไฟ';
       telemetry = '<h3>ค่าจำลอง ณ นาที ' + state.minute + '</h3><div class="data-values"><div><strong>' + (r.pm === null ? '—' : number(r.pm, 1)) + '</strong><small>PM2.5 · µg/m³</small></div><div><strong>' + (r.co === null ? '—' : number(r.co, 2)) + '</strong><small>CO · ppm</small></div></div><div class="detail-alert">' + statusText + '</div>' + ([...readings.values()].some(v => v.status === 'SUSPECT') ? '<button id="acknowledge" class="button-outline" style="margin-top:10px" ' + (state.acknowledged ? 'disabled' : '') + '>' + (state.acknowledged ? 'รับทราบฉากแล้ว · ยังไม่ยืนยันไฟ' : 'รับทราบในฉากจำลอง') + '</button>' : '');
     }
-    $('details').innerHTML = '<div class="detail-header-block"><div class="detail-top"><span class="detail-id">' + s.id + '</span><span class="detail-status ' + (s.conditional ? 'warn' : '') + '">' + (s.conditional ? 'ทางดิน · ต้องตรวจสิทธิ์' : 'รอสำรวจหน้างาน') + '</span></div><h2>' + escape(s.label) + '</h2><p class="detail-subtitle">' + escape(kit.name) + ' · ฝั่ง' + (s.side === 'E' ? 'ตะวันออก' : 'ตะวันตก') + '</p><div class="coordinates">' + s.lat.toFixed(7) + ', ' + s.lon.toFixed(7) + '<a href="https://www.google.com/maps/search/?api=1&query=' + s.lat + '%2C' + s.lon + '" target="_blank" rel="noopener noreferrer">เปิดพิกัดใน Google Maps ↗</a></div><div class="detail-grid"><div><span>ห่างหมุดเป้าหมาย</span><b>' + number(s.distanceM / 1000, 2) + ' กม.</b></div><div><span>ระดับ DEM โดยประมาณ</span><b>' + number(s.elevationM) + ' ม.</b></div><div><span>ผิวทางใน OSM</span><b>' + surface + '</b></div><div><span>Gateway ที่เสนอ</span><b>' + s.gateway + '</b></div></div></div><div class="detail-body-block"><h3>เหตุผลที่เลือกจุดนี้</h3><p class="reason">' + escape(s.reason) + '</p><h3>สิ่งที่ต้องตรวจหน้างาน</h3><p class="field-note">' + escape(s.fieldNote) + '<br>แดด / สิทธิ์ติดตั้ง / ไหล่ทาง / วิทยุ: ยังไม่ผ่านการสำรวจ</p>' + telemetry + '<a class="detail-doc" href="https://www.openstreetmap.org/way/' + s.wayId + '" target="_blank" rel="noopener noreferrer">ตรวจถนนต้นทาง OSM #' + s.wayId + ' ↗</a></div><div class="detail-power-block"><div class="power-card"><p class="eyebrow">SOLAR + BATTERY</p><div class="power-line"><span>แผงโซลาร์</span><b>' + kit.panelWp + ' Wp</b></div><div class="power-line"><span>LiFePO₄</span><b>' + kit.batteryV + ' V · ' + kit.batteryAh + ' Ah</b></div><div class="power-line"><span>งบโหลดเฉลี่ย</span><b>' + kit.averageW + ' W</b></div><div class="autonomy-bar"><span style="width:' + Math.min(100, p.autonomyHours / 168 * 100) + '%"></span></div><div class="power-line"><span>สำรองเมื่อไม่มีแดด</span><b>' + number(p.autonomyHours, 1) + ' ชม.</b></div><small>สมมติแบตเต็ม · เผื่อความจุเสื่อม 20% แล้ว ไม่ใช่ค่าที่วัดจากอุปกรณ์จริง</small></div><a class="detail-doc" href="./docs/DESIGN.md" target="_blank" rel="noopener">อ่าน Design และสูตรคำนวณ ↗</a></div>';
+    $('details').innerHTML = '<div class="detail-header-block"><div class="detail-top"><span class="detail-id">' + s.id + '</span><span class="detail-status ' + (s.conditional ? 'warn' : '') + '">' + (s.conditional ? 'ทางบริการ · มีเงื่อนไข' : 'รอสำรวจหน้างาน') + '</span></div><h2>' + escape(s.label) + '</h2><p class="detail-subtitle">' + escape(kit.name) + ' · ฝั่ง' + (s.side === 'E' ? 'ตะวันออก' : 'ตะวันตก') + '</p><div class="coordinates">' + s.lat.toFixed(7) + ', ' + s.lon.toFixed(7) + '<a href="https://www.google.com/maps/search/?api=1&query=' + s.lat + '%2C' + s.lon + '" target="_blank" rel="noopener noreferrer">เปิดพิกัดใน Google Maps ↗</a></div><div class="detail-grid"><div><span>ห่างหมุดเป้าหมาย</span><b>' + number(s.distanceM / 1000, 2) + ' กม.</b></div><div><span>ระดับ DEM โดยประมาณ</span><b>' + number(s.elevationM) + ' ม.</b></div><div><span>ผิวทางใน OSM</span><b>' + surface + '</b></div><div><span>Gateway ที่เสนอ</span><b>' + s.gateway + '</b></div></div></div><div class="detail-body-block"><h3>เหตุผลที่เลือกจุดนี้</h3><p class="reason">' + escape(s.reason) + '</p><h3>สิ่งที่ต้องตรวจหน้างาน</h3><p class="field-note">' + escape(s.fieldNote) + '<br>แดด / สิทธิ์ติดตั้ง / ไหล่ทาง / วิทยุ: ยังไม่ผ่านการสำรวจ</p>' + telemetry + '<a class="detail-doc" href="https://www.openstreetmap.org/way/' + s.wayId + '" target="_blank" rel="noopener noreferrer">ตรวจถนนต้นทาง OSM #' + s.wayId + ' ↗</a></div><div class="detail-power-block"><div class="power-card"><p class="eyebrow">SOLAR + BATTERY</p><div class="power-line"><span>แผงโซลาร์</span><b>' + kit.panelWp + ' Wp</b></div><div class="power-line"><span>LiFePO₄</span><b>' + kit.batteryV + ' V · ' + kit.batteryAh + ' Ah</b></div><div class="power-line"><span>งบโหลดเฉลี่ย</span><b>' + kit.averageW + ' W</b></div><div class="autonomy-bar"><span style="width:' + Math.min(100, p.autonomyHours / 168 * 100) + '%"></span></div><div class="power-line"><span>สำรองเมื่อไม่มีแดด</span><b>' + number(p.autonomyHours, 1) + ' ชม.</b></div><small>สมมติแบตเต็ม · เผื่อความจุเสื่อม 20% แล้ว ไม่ใช่ค่าที่วัดจากอุปกรณ์จริง</small></div><a class="detail-doc" href="./docs/DESIGN.md" target="_blank" rel="noopener">อ่าน Design และสูตรคำนวณ ↗</a></div>';
   }
   function renderEnergy() {
     const rows = stations.map(s => ({ s, kit: plan.kits[s.kit], p: C.power(plan.kits[s.kit], plan.powerAssumptions, state.psh, state.sunAccess, state.load) }));
@@ -70,11 +70,11 @@
     renderList(); renderDetails(); requestMap();
   }
   function setView(name) {
-    if (!['plan', 'analysis', 'demo', 'power'].includes(name)) return;
+    if (!['plan', 'demo', 'power'].includes(name)) return;
     state.view = name;
     if (name !== 'demo') state.playing = false;
     document.querySelectorAll('[data-view]').forEach(button => { button.classList.toggle('active', button.dataset.view === name); button.setAttribute('aria-pressed', String(button.dataset.view === name)); });
-    $('analysis-controls').hidden = name !== 'analysis'; $('analysis-results').hidden = name !== 'analysis'; $('demo-controls').hidden = name !== 'demo'; $('workspace').hidden = name === 'power'; $('power-view').hidden = name !== 'power';
+    $('demo-controls').hidden = name !== 'demo'; $('workspace').hidden = name === 'power'; $('power-view').hidden = name !== 'power';
     $('mode-pill').classList.toggle('demo', name === 'demo');
     $('mode-pill').innerHTML = name === 'demo' ? '<i></i>ข้อมูลสังเคราะห์ · ไม่ใช่เหตุจริง' : '<i></i>แบบเสนอ · ยังไม่ติดตั้ง';
     $('map-title').textContent = name === 'demo' ? 'สถานการณ์จำลองบนถนนจริง' : 'แผนติดตั้งริมถนน';
@@ -147,18 +147,18 @@
     for (const [key, image] of tiles) if (!used.has(key)) { image.remove(); tiles.delete(key); }
   }
   let frame = 0;
-  function requestMap() { if (frame) return; frame = requestAnimationFrame(() => { frame = 0; renderMap(); window.dispatchEvent(new Event('wildfire:map-render')); }); }
+  function requestMap() { if (frame) return; frame = requestAnimationFrame(() => { frame = 0; renderMap(); }); }
   function renderMap() {
     if (state.view === 'power') return;
     const focused = document.activeElement && document.activeElement.getAttribute('data-map-node');
     drawTerrain(); drawTiles(); svg.replaceChildren(); svg.setAttribute('viewBox', '0 0 ' + view.width + ' ' + view.height);
     const roads = elem('g', { 'aria-hidden': 'true' }, svg);
     for (const road of roadPaths) {
-      const minor = ['path', 'footway', 'steps'].includes(road.properties.highway);
+      const minor = ['path', 'footway', 'track', 'steps'].includes(road.properties.highway);
       const d = road.world.map((w, i) => { const [x, y] = screenWorld(w); return (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1); }).join(' ');
       const active = road.properties.osm_way_id === byId.get(state.selected).wayId;
       if (!minor) elem('path', { d, fill: 'none', stroke: active ? '#729342' : '#6d7e5f', 'stroke-width': active ? 6.5 : 3.5, opacity: active ? 0.85 : 0.55, 'stroke-linejoin': 'round' }, roads);
-      elem('path', { d, fill: 'none', stroke: minor ? '#7c8064' : active ? '#f3ffd4' : '#ffffea', 'stroke-width': minor ? 1 : active ? 3.5 : 1.8, 'stroke-dasharray': minor ? '3 4' : road.properties.highway === 'track' ? '6 3' : '', opacity: minor ? 0.5 : 0.95, 'stroke-linejoin': 'round' }, roads);
+      elem('path', { d, fill: 'none', stroke: minor ? '#7c8064' : active ? '#f3ffd4' : '#ffffea', 'stroke-width': minor ? 1 : active ? 3.5 : 1.8, 'stroke-dasharray': minor ? '3 4' : '', opacity: minor ? 0.5 : 0.95, 'stroke-linejoin': 'round' }, roads);
     }
     if (state.view === 'demo' && state.scenario === 'smoke' && state.minute > 5) {
       const spread = C.spread(options().source, state.windToDeg, state.windSpeedMps, state.ros, terrain);
@@ -185,7 +185,7 @@
       if (selected) elem('circle', { cx: x, cy: y, r: 24, fill: '#f1ffc0', 'fill-opacity': 0.65, stroke: '#577848', 'stroke-width': 1, 'stroke-dasharray': '3 3' }, g);
       if (s.kit === 'HUB') elem('rect', { x: x - 14, y: y - 14, width: 28, height: 28, rx: 8, fill, stroke: '#fffef1', 'stroke-width': 2.5 }, g);
       else elem('circle', { cx: x, cy: y, r: 14, fill, stroke: '#fffef1', 'stroke-width': 2.5 }, g);
-      elem('text', { x, y: y + 3.5, fill: '#fffde9', 'font-size': 10, 'font-weight': 700, 'text-anchor': 'middle' }, g, s.screenLabel || s.id);
+      elem('text', { x, y: y + 3.5, fill: '#fffde9', 'font-size': 10, 'font-weight': 700, 'text-anchor': 'middle' }, g, s.id);
       if (s.conditional) elem('circle', { cx: x + 12, cy: y - 12, r: 4, fill: '#d7a052', stroke: '#fff6e2', 'stroke-width': 1 }, g);
     }
     if (state.view === 'demo') {
@@ -206,7 +206,7 @@
   function resize() { const rect = map.getBoundingClientRect(); if (!rect.width || !rect.height) return; view.width = rect.width; view.height = rect.height; requestMap(); }
   function fit() {
     resize();
-    const points = window.RoadsideSiting.circle(plan.target, plan.studyRadiusM).map(p => C.world(p.lat, p.lon));
+    const points = [...stations, plan.target].map(p => C.world(p.lat, p.lon));
     const xs = points.map(p => p[0]), ys = points.map(p => p[1]), west = Math.min(...xs), east = Math.max(...xs), north = Math.min(...ys), south = Math.max(...ys);
     view.center = [(west + east) / 2, (north + south) / 2];
     view.zoom = C.clamp(Math.log2(Math.min(view.width / ((east - west) * 1.27), view.height / ((south - north) * 1.9)) / 256), 11, 18);
@@ -238,13 +238,13 @@
   setInterval(() => { if (!state.playing || document.hidden || state.view !== 'demo') return; state.minute = Math.min(60, state.minute + 1); if (state.minute >= 60) state.playing = false; renderDemo(); }, 1000);
   [['psh', 'psh', 1], ['shade', 'sunAccess', 100], ['load', 'load', 1]].forEach(([id, key, divisor]) => $(id).addEventListener('input', () => { state[key] = Number($(id).value) / divisor; renderEnergy(); }));
   $('export').onclick = () => {
-    const format = $('export-format').value, content = format === 'csv' ? C.csv(plan) : format === 'kml' ? C.kml(plan) : JSON.stringify(window.RoadsideSiting.geojson(plan), null, 2);
+    const format = $('export-format').value, content = format === 'csv' ? C.csv(plan) : format === 'kml' ? C.kml(plan) : JSON.stringify(C.features(plan), null, 2);
     const mime = format === 'csv' ? 'text/csv;charset=utf-8' : format === 'kml' ? 'application/vnd.google-earth.kml+xml' : 'application/geo+json';
-    const url = URL.createObjectURL(new Blob([content], { type: mime })), anchor = document.createElement('a'); anchor.href = url; anchor.download = 'wildfire-roadside-9-stations.' + format; document.body.appendChild(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('ส่งออก 9 หมุดแล้ว · สถานะจุดเสนอสำรวจ ไม่ใช่ฐานรากที่อนุมัติ');
+    const url = URL.createObjectURL(new Blob([content], { type: mime })), anchor = document.createElement('a'); anchor.href = url; anchor.download = 'wildfire-roadside-8-stations.' + format; document.body.appendChild(anchor); anchor.click(); anchor.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000); toast('ส่งออก 8 หมุดแล้ว · สถานะจุดเสนอสำรวจ ไม่ใช่ฐานรากที่อนุมัติ');
   };
   $('data-status').textContent = 'OSM snapshot ' + context.meta.acquired_at.slice(0, 10) + ' · ' + context.roads.features.length + ' แนวถนน/เส้นทาง · พิกัดยังไม่ผ่านสำรวจ';
   new ResizeObserver(resize).observe(map);
   renderList(); renderDetails(); fit();
   // Read-only introspection for reproducible QA. No command, dispatch or live-sensor access.
-  window.WildfireApp = Object.freeze({ project: point => screen(point), unproject: (x,y) => C.unworld(view.center[0]+(x-view.width/2)/(256*2**view.zoom),view.center[1]+(y-view.height/2)/(256*2**view.zoom)), requestMap, getState: () => ({ ...state, selectedStation: { ...byId.get(state.selected) }, stationCount: stations.length, hasTerrain: Boolean(terrain), mapZoom: view.zoom, mode: state.view === 'demo' ? 'SYNTHETIC_DEMO' : 'PROPOSED_PLAN' }) });
+  window.WildfireApp = Object.freeze({ getState: () => ({ ...state, selectedStation: { ...byId.get(state.selected) }, stationCount: stations.length, hasTerrain: Boolean(terrain), mapZoom: view.zoom, mode: state.view === 'demo' ? 'SYNTHETIC_DEMO' : 'PROPOSED_PLAN' }) });
 })();

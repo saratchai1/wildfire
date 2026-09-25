@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "source_commit": "15035a3592da4c98e30925ec0ae4b06ccfe4161c",
+  "tests": [
+    {
+      "name": "Nine nearer road anchors, mapped study circle, restricted access and revised power budgets",
+      "status": "PASS"
+    },
+    {
+      "name": "Full-domain deterministic screening, nearby case, northern miss, calm, unavailable, wind controls and overlay",
+      "status": "PASS"
+    },
+    {
+      "name": "Nine-coordinate GIS exports and complete reproducible screening export",
+      "status": "PASS"
+    },
+    {
+      "name": "Original-style PM CO timeline and offline handling preserved with new station positions",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile analysis layout and unavailable online imagery retain actual roads and all station markers",
+      "status": "PASS"
+    }
+  ],
+  "runtime_errors": [],
+  "fieldCommissioning": "NOT_PERFORMED"
+}

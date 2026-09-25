@@ -46,6 +46,7 @@ app=replace(app,"const points = stations.map(s => C.world(s.lat, s.lon));","cons
 # fit() actual array may include target. Replace its point expression while retaining padding logic.
 import re
 app,n=re.subn(r"const points = \[plan.target, \.\.\.stations\]\.map\([^;]+;","const points = window.RoadsideSiting.circle(plan.target, plan.studyRadiusM).map(s => C.world(s.lat, s.lon));",app)
+app=app.replace('const points = [...stations, plan.target].map(p => C.world(p.lat, p.lon));', 'const points = window.RoadsideSiting.circle(plan.target, plan.studyRadiusM).map(p => C.world(p.lat, p.lon));')
 assert 'RoadsideSiting.circle(plan.target' in app, 'fit point expression changed'
 app=app.replace("s.conditional ? 'ทางบริการ · มีเงื่อนไข'", "s.conditional ? 'ทางดิน · ต้องตรวจสิทธิ์'")
 app=app.replace("' · ทางบริการ*'","' · ทางดิน*'")
