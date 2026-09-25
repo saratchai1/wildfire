@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "source_commit": "15035a3592da4c98e30925ec0ae4b06ccfe4161c",
+  "source_commit": "6ece8feb0a96f2f482d1e88e3db16b386dea89ec",
   "tests": [
     {
       "name": "Nine nearer road anchors, mapped study circle, restricted access and revised power budgets",
