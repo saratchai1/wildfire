@@ -93,16 +93,16 @@
     return { heading: magnitude > 0.0001 ? (degrees(heading) + 360) % 360 : null, hasTerrain, contours, model: 'ILLUSTRATIVE_ELLIPSE_NOT_CALIBRATED' };
   }
   function features(plan) {
-    return { type: 'FeatureCollection', features: plan.stations.map(s => ({ type: 'Feature', properties: { id: s.id, label: s.label, kit: s.kit, status: plan.status, coordinate_role: 'ROAD_CENTERLINE_SURVEY_ANCHOR_NOT_FOUNDATION', road_surface: s.surface, osm_way_id: s.wayId, source_candidate: s.sampleId, solar_status: 'NOT_SURVEYED', permission_status: 'NOT_VERIFIED', radio_status: 'NOT_SURVEYED', conditional_service_road: s.conditional, panel_wp: plan.kits[s.kit].panelWp, battery_v: plan.kits[s.kit].batteryV, battery_ah: plan.kits[s.kit].batteryAh }, geometry: { type: 'Point', coordinates: [s.lon, s.lat] } })) };
+    return { type: 'FeatureCollection', features: plan.stations.map(s => ({ type: 'Feature', properties: { id: s.id, label: s.label, kit: s.kit, status: plan.status, coordinate_role: s.coordinateRole || 'ROAD_CENTERLINE_SURVEY_ANCHOR_NOT_FOUNDATION', road_surface: s.surface, osm_way_id: s.wayId, source_candidate: s.sampleId, solar_status: 'NOT_SURVEYED', permission_status: 'NOT_VERIFIED', radio_status: 'NOT_SURVEYED', conditional_service_road: s.conditional, panel_wp: plan.kits[s.kit].panelWp, battery_v: plan.kits[s.kit].batteryV, battery_ah: plan.kits[s.kit].batteryAh }, geometry: { type: 'Point', coordinates: [s.lon, s.lat] } })) };
   }
   function csv(plan) {
     const keys = ['id','lat','lon','kit','surface','wayId','sampleId','conditional'];
     const quote = value => '"' + String(value).replace(/"/g, '""') + '"';
-    return '\ufeff' + [...[keys.concat(['status','solar_status','coordinate_role']).join(',')], ...plan.stations.map(s => keys.map(k => quote(s[k])).concat([quote(plan.status), quote('NOT_SURVEYED'), quote('ROAD_CENTERLINE_SURVEY_ANCHOR_NOT_FOUNDATION')]).join(','))].join('\r\n');
+    return '\ufeff' + [...[keys.concat(['status','solar_status','coordinate_role']).join(',')], ...plan.stations.map(s => keys.map(k => quote(s[k] ?? '')).concat([quote(plan.status), quote('NOT_SURVEYED'), quote(s.coordinateRole || 'ROAD_CENTERLINE_SURVEY_ANCHOR_NOT_FOUNDATION')]).join(','))].join('\r\n');
   }
   function xml(value) { return String(value).replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]); }
   function kml(plan) {
-    return '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Wildfire roadside survey anchors</name>' + plan.stations.map(s => '<Placemark><name>' + xml(s.id + ' · ' + s.label) + '</name><description>' + xml('PROPOSED. Road centerline survey anchor, not foundation. Solar, permissions and radio NOT VERIFIED. OSM way ' + s.wayId + '. ' + s.reason) + '</description><Point><coordinates>' + s.lon + ',' + s.lat + ',0</coordinates></Point></Placemark>').join('') + '</Document></kml>';
+    return '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Wildfire roadside survey anchors</name>' + plan.stations.map(s => '<Placemark><name>' + xml(s.id + ' · ' + s.label) + '</name><description>' + xml((s.coordinateSource === 'USER_DMS' ? 'PROPOSED. Exact user coordinate, NOT snapped to road; NOT surveyed or approved. ' : 'PROPOSED. Road centerline survey anchor, not foundation. ') + 'Solar, permissions and radio NOT VERIFIED. ' + (s.wayId ? 'OSM way ' + s.wayId + '. ' : 'Road and gateway match NOT VERIFIED. ') + s.reason) + '</description><Point><coordinates>' + s.lon + ',' + s.lat + ',0</coordinates></Point></Placemark>').join('') + '</Document></kml>';
   }
   const api = { clamp, finite, delta, offset, world, unworld, power, classify, reading, elevation, spread, features, csv, kml };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

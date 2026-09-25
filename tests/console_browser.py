@@ -18,13 +18,13 @@ try:
   def landing():
    expect(page.locator('.primary-nav a')).to_have_count(2)
    expect(page.locator('#dashboard')).to_be_visible();expect(page.locator('#principles')).to_be_hidden()
-   expect(page.locator('#ops-map [data-station]')).to_have_count(9)
-   expect(page.locator('#station-table tr')).to_have_count(9)
-   assert state()['stationCount']==9 and state()['mode']=='SYNTHETIC_DEMO'
+   expect(page.locator('#ops-map [data-station]')).to_have_count(10)
+   expect(page.locator('#station-table tr')).to_have_count(10)
+   assert state()['stationCount']==10 and state()['mode']=='SYNTHETIC_DEMO'
    assert len(state()['snapshot']['alerts'])>=1
    expect(page.locator('#metric-first')).to_contain_text(str(state()['estimate']['firstAlert']['alertMin']))
    page.screenshot(path=str(qa/'console-dashboard-desktop.jpg'),type='jpeg',quality=70,full_page=True)
-  record('Two primary views, officer landing, real nine-node map and shared alert KPI',landing)
+  record('Two primary views, officer landing, real ten-node map and shared alert KPI',landing)
   def officer():
    page.locator('#ack').click();assert state()['acknowledgedAt']==10
    expect(page.locator('#ack')).to_be_disabled();expect(page.locator('[data-event="ACK"]')).to_have_count(1)
@@ -107,7 +107,7 @@ try:
    expect(page.locator('#toast')).to_be_hidden(timeout=6000)
    page.screenshot(path=str(qa/'console-principles-mobile.jpg'),type='jpeg',quality=65,full_page=True)
    page.locator('[data-basemap="learn"]').select_option('satellite')
-   expect(page.locator('#learn-map .map-error')).to_be_visible();expect(page.locator('#learn-map [data-station]')).to_have_count(9)
+   expect(page.locator('#learn-map .map-error')).to_be_visible();expect(page.locator('#learn-map [data-station]')).to_have_count(10)
    page.locator('#nav-dashboard').click();expect(page.locator('#dashboard')).to_be_visible()
    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
    page.locator('[data-select="R08"]').click();expect(page.locator('#station-title')).to_have_text('สถานี W3')

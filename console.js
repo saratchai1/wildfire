@@ -95,7 +95,7 @@
     update({ source, sourceName: { center: 'หมุดกลางภูเขา', near: 'ใกล้สถานี E3', north: 'ตอนเหนือของพื้นที่', south: 'ตอนใต้ของพื้นที่' }[choice] });
   });
   $('apply-source').onclick = () => { const lat = $('source-lat').value, lon = $('source-lon').value; chooseSource({ lat: lat.trim() ? Number(lat) : NaN, lon: lon.trim() ? Number(lon) : NaN }); };
-  document.querySelectorAll('[data-preset]').forEach(button => button.onclick = () => { const preset = button.dataset.preset; state = M.initial(P); state.scenario = ['north', 'smoke'].includes(preset) ? 'smoke' : preset; state.windToDeg = preset === 'north' ? 0 : 135; state.minute = preset === 'offline' ? 20 : 10; recalculate(); render(); });
+  document.querySelectorAll('[data-preset]').forEach(button => button.onclick = () => { const preset = button.dataset.preset; state = M.initial(P); state.scenario = ['north', 'smoke'].includes(preset) ? 'smoke' : preset; state.windToDeg = preset === 'north' ? 0 : 135; state.minute = preset === 'offline' ? 20 : 10; if (preset === 'north') state.selected = 'R10'; recalculate(); render(); });
   $('station-table').onclick = e => { const button = e.target.closest('[data-select]'); if (button) chooseStation(button.dataset.select); };
   $('ops-minute').oninput = () => { state = M.seek(P, state, Number($('ops-minute').value)); render(); };
   $('play').onclick = () => { if (state.minute >= 60) state = M.seek(P, state, 0); state = { ...state, playing: !state.playing }; render(); };
