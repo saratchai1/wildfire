@@ -1,0 +1,45 @@
+# Inverse Source v1 — Design packet and observation contract
+
+## Accepted scope
+User approved observation-only source-area inference, not a preselected fire pin. Keep the existing ten roadside coordinates including exact N1, solar kits, 2 km study boundary and old tools. Root has two views: officer dashboard and blind-simulation laboratory. No writes to bdteamditto/fire. No live sensor backend, confirmation, dispatch, operational evacuation advice or field-accuracy claims.
+
+## Architecture
+- `inverse-simulator.js`: independent time-stepped Gaussian puff fixture; owns private truth and emits allowed observation packets only. No dependency on the inverse engine. Existing legacy kernels are untouched.
+- `inverse-engine.js`: pure `infer(packet)`; has no access to generator, DOM, scenario, true source or ignition time. Reject unknown keys including truth/source at every object boundary.
+- `inverse-worker.js`: imports only inverse engine. Messages are `{id,packet}` and responses `{id,result}` or `{id,error}`. UI ignores obsolete request IDs. Synchronous local fallback when Workers are unavailable uses the same observation-only function.
+- `inverse-ui.js`: observer replay and laboratory controller. Officer rendering receives observations and inference result, not truth. Revealing is allowed only in laboratory; markers and text are removed on leaving. This is algorithmic/UI separation, NOT a security boundary against someone inspecting the browser's synthetic generator. There is no user-role authentication.
+- Existing officer/forward app is preserved at `forward.html`; planning and v1 unchanged. Legacy browser assertions run against their preserved entrypoint through an explicit URL-remapping wrapper; assertions are not weakened.
+
+## Observation contract v1
+Root EXACT keys: `schemaVersion:1`, `asOf` ISO8601 timezone, `domain:{center:{lat,lon},radiusM:2000}`, `stations`, `observations`.
+Station keys: `id, lat, lon, elevationM, inletHeightM`. Physical height metadata is reserved; current solver is horizontal and does not use vertical dispersion.
+Observation keys: `stationId, observedAt, receivedAt, pm25, co, baselinePm25, baselineCo, windFromDeg, windSpeedMps, temperatureC, relativeHumidityPct, quality, windQuality`.
+Units: PM2.5 µg/m³; CO ppm; wind m/s; windFromDeg is meteorological FROM direction. Engine converts to velocity pointing TO = FROM+180°. Quality: VALID / STALE / INVALID. Baselines must come from calibrated external preprocessing; this release does not estimate a reliable field baseline automatically.
+
+Timestamps must include timezone. Future or not-yet-received records are excluded. Clock order, unknown IDs, malformed enums, duplicate conflicts and forbidden fields fail explicitly. Invalid/null concentrations cannot become zeros. Replay only sends records already received at asOf. Import cap 2 MB, engine cap 8,000 records / 50 stations; UI additionally requires the canonical ten station IDs and coordinates. Processing and imports stay in the browser; no upload. Satellite tile requests are optional and do not include telemetry.
+
+## Calculation and assumptions (PROPOSED screening, not calibrated physics)
+1. Evidence: increments over per-station baseline >25 µg/m³ PM AND >0.2 ppm CO on successive samples 30–90 seconds apart. These inherited numerical cutoffs are illustrative, not field thresholds; CO can originate from engines, not just forest fire. Latest readings expire after 120 seconds. Recent supporting signals are retained for 20 minutes while the station remains fresh.
+2. Retain valid quiet observations as constraints, not just alarms. Select at most one sample per 120-second bin within the recent 20 minutes. Missing data have no negative-evidence meaning.
+3. Reconstruct a horizontal wind vector at each trajectory step from measured wind records using inverse-distance component weighting, with 250 m softening. No averaging of circular degree values. Only prior wind observations at most 120 seconds old are used; stop on gaps or calm <0.3 m/s. This is NOT WindNinja, CFD, terrain-flow or canopy modeling.
+4. Receptor backtrajectories use 60-second steps up to 30 minutes. Candidate response integrates Gaussian footprints along each trace, sigma=80m+age*spread and illustrative decay exp(-age/3600). Hypothesize effective release start in 120-second bins and fit independent nonnegative PM/CO source scales. Two Huber reweightings and equal-station loss limit spikes. Normalizing residual scales 8 µg/m³ and 0.06 ppm are assumptions, not measured calibration uncertainties.
+5. Search ALL candidates on 200 m grid to 4 km radius, allowing external origin. Study area remains 2 km. Three sensitivity members: heading/spread (0°,.16m/s), (-10°,.12m/s), (+10°,.22m/s). Keep union of candidate losses within member best + max(0.5,0.3*best). If union ≤180 coarse cells, refine every retained area into 100m cells under ALL three members, not solely nominal best. Threshold bands are heuristics, not statistical confidence intervals.
+6. Output connected candidate regions rather than a point. ONE supporting station => directional corridor only. Fewer than 3 supporting stations, broad region >2km², disagreement >600m, or multiple regions => AMBIGUOUS. These are conservative presentation gates, not a theorem that three stations suffice. Robust normalized loss >1 => MODEL_MISMATCH, no source area claim; this is a heuristic abstention gate. Source near/outside search boundary remains explicitly possible, never forced inside study disk.
+
+## Output contract
+`status`: NO_SIGNAL, PARTICULATE_ONLY, INSUFFICIENT_DATA, WIND_UNAVAILABLE, DIRECTIONAL_ONLY, AMBIGUOUS, CANDIDATE_AREAS, EXTERNAL_POSSIBLE, MODEL_MISMATCH.
+`cells` and `zones` are relative fit hypotheses, `directionalCorridors` are past-wind screening tracks, not lines pointing directly at a fire. `probability=null`, `confidenceLevel=null`, `fieldValidated=false`, `estimatedIgnitionAt=null` always. Optional releaseWindow is a profile-fit effective smoke-release interval, not ignition time or a calibrated time confidence interval; leftCensored indicates truncated history. No observed concentration is converted to fire intensity. No fire spread/evacuation polygon is produced.
+
+Timing: firstSignalAt is the timestamp of the first retained sustained measurement sequence, not physical ignition. Officer clock is observation time, never time since a known ignition. Import/replay acknowledgement is in-page only and resets on a new dataset or rewind. Lab eight-direction table uses complete hypothetical forward data and reports time since simulated smoke release, explicitly not localization latency. The previous forward time calculator remains at forward.html#principles.
+
+## Testing and evidence
+Pure tests: forbidden truth injection; fixed observations unaffected by modified truth; independent forward kernel; chronology, unreceived records and duplicates; quiet-station influence; missing/calm wind; one-sensor abstention; changing wind; noise/delay/gaps; external source; a conflicting two-source fixture; all N1 coordinates; held-out non-grid-aligned coordinates. Held-out cases are reported whether covered or not, not promoted to field detection probability.
+Browser: actual worker payload inspection, two routes, ten stations, hidden truth/reveal removal, playback/rewind/ack, stale response protection, eight direction table, local import and JSON exports, desktop/mobile/keyboard/offline-basemap. Old unit and browser regressions retained. CI gates deployment; live proof checks exact main commit, appVersion, 10-station N1 data and SHA-256 of all new assets.
+
+## Limitations and rollout
+This is the first screening implementation. Independent simulator still shares simplified Gaussian transport assumptions; it is not an independent physical validation. Multiple sources can evade a single-source mismatch gate and are not separately resolved. No measured localization accuracy, no guaranteed detection time, no operational SLA. Required next phases: sensor baseline/co-location calibration, clock and transmission verification, controlled authorized field observations, terrain-aware wind inputs, 3D/plume-rise effects, probabilistic coverage calibration, multi-source model selection and blind held-out field trials. Preserve data uncertainty and operator acknowledgement before integrating real alerting.
+
+## Primary references (method inspiration, not software integrated)
+- NOAA HYSPLIT Source-Receptor Matrix: https://hysplit2.arl.noaa.gov/documents/Tutorial/html/src_recp.html — compare source hypotheses with receptor measurements.
+- NOAA inverse modeling: https://www.arl.noaa.gov/hysplit/hysplit-inverse-modeling/ — fitting emissions against observed concentration with uncertainty.
+- USDA WindNinja: https://research.fs.usda.gov/firelab/products/dataandtools/windninja — terrain-dependent wind fields from one or more surface measurements. Not integrated in this release.

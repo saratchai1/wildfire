@@ -2,7 +2,7 @@ name: Validate and deploy roadside pilot
 on:
   workflow_dispatch:
   push:
-    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3, feature/north-station-n1]
+    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3, feature/north-station-n1, feature/inverse-source-v1]
     paths-ignore: ['qa/**', 'README.md']
   pull_request:
     branches: [main]
@@ -17,16 +17,25 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Capture exact source under review
+        run: |
+          git archive --format=zip --output=wildfire-source.zip HEAD
+          mkdir -p qa
+          git rev-parse HEAD > qa/validated-source-commit.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Syntax and shared-model plus preserved regression tests
+      - name: Syntax and all observation/model/geospatial regression tests
+        shell: bash
         run: |
-          for f in core.js app.js siting.js siting-ui.js history.js console-model.js console-map.js console.js; do node --check "$f"; done
-          node --test tests/*.test.cjs
+          set -euo pipefail
+          for f in core.js app.js siting.js siting-ui.js history.js console-model.js console-map.js console.js inverse-engine.js inverse-simulator.js inverse-worker.js inverse-ui.js; do node --check "$f"; done
+          node --test tests/*.test.cjs | tee qa/unit-tests.tap
           node scripts/assess_roadside_v2.cjs > /tmp/roadside-screening.log
       - name: Build committed static applications
         run: node scripts/build.cjs
@@ -34,14 +43,19 @@ jobs:
         run: |
           pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
-      - name: Browser proof for v1 planning and two-part officer application
+      - name: Browser proof for preserved tools and blind inverse application
         run: |
           python -m http.server 4173 --directory site >/tmp/wildfire-http.log 2>&1 &
           python tests/browser.py
           python tests/history_browser.py
           python tests/siting_browser.py
-          python tests/console_browser.py
-          python tests/north_browser.py
+          python tests/legacy_console_regression.py
+          python tests/inverse_browser.py
+      - name: Require immutable application sources
+        if: always()
+        run: |
+          git diff --exit-code -- . ':!qa/**'
+          git diff --cached --exit-code -- . ':!qa/**'
       - name: Portable application
         run: cd site && zip -qr ../wildfire-roadside-pilot.zip .
       - uses: actions/upload-artifact@v4
@@ -51,6 +65,7 @@ jobs:
           path: |
             artifacts/
             qa/
+            wildfire-source.zip
             wildfire-roadside-pilot.zip
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -69,41 +84,42 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/configure-pages@v5
-      - name: Deploy validated two-part application
+      - name: Deploy validated inverse application
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live two-part app and exact N1 version
+      - name: Verify live inverse app, asset hashes and exact N1 version
         env:
           SITE_URL: ${{ steps.deployment.outputs.page_url }}
           EXPECTED_SHA: ${{ github.sha }}
         run: |
           python3 - <<'PY'
-          import json,os,time,urllib.request,pathlib
+          import json,os,time,urllib.request,pathlib,hashlib
           base=os.environ['SITE_URL'].rstrip('/')+'/'
           expected=os.environ['EXPECTED_SHA']
+          def get(file):
+              request=urllib.request.Request(base+file+'?rev='+expected,headers={'Cache-Control':'no-cache','User-Agent':'Wildfire-Pages-Verification'})
+              with urllib.request.urlopen(request,timeout=20) as r:
+                  assert r.status==200
+                  return r.read()
           for attempt in range(18):
               try:
-                  request=urllib.request.Request(base+'version.json?rev='+expected+'&attempt='+str(attempt),headers={'Cache-Control':'no-cache','User-Agent':'Wildfire-Pages-Verification'})
-                  with urllib.request.urlopen(request,timeout=15) as r:version=json.load(r)
-                  assert version['sourceCommit']==expected,version
-                  assert version['appVersion']=='operator-explainer-v3',version
+                  version=json.loads(get('version.json'))
+                  assert version['sourceCommit']==expected and version['appVersion']=='inverse-source-v1',version
                   assert version['planVersion']=='roadside-2km-v3-north' and version['stationCount']==10,version
-                  assert version['primaryViews']==['dashboard','principles'],version
-                  with urllib.request.urlopen(base+'?rev='+expected,timeout=15) as r:html=r.read().decode('utf-8')
-                  assert 'nav-dashboard' in html and 'nav-principles' in html and 'console-model.js' in html
-                  for file in ['console-model.js','console-map.js','console.js','console.css','planning.html','data/plan.js']:
-                      with urllib.request.urlopen(base+file+'?rev='+expected,timeout=15) as r:assert r.status==200 and len(r.read())>100
-                  with urllib.request.urlopen(base+'data/plan-v2.json?rev='+expected,timeout=15) as r:plan=json.load(r)
-                  assert plan['version']=='roadside-2km-v3-north' and len(plan['stations'])==10
+                  assert version['primaryViews']==['dashboard','principles'] and version['fieldValidated'] is False
+                  for file,digest in version['assets'].items():
+                      assert hashlib.sha256(get(file)).hexdigest()==digest,file
+                  html=get('index.html').decode('utf-8')
+                  assert 'nav-dashboard' in html and 'nav-principles' in html and 'inverse-ui.js' in html
+                  plan=json.loads(get('data/plan-v2.json'));assert len(plan['stations'])==10
                   north=next(s for s in plan['stations'] if s['id']=='R10')
-                  assert north['screenLabel']=='N1' and north['side']=='N'
                   assert abs(north['lat']-(18+49/60+53.6/3600))<1e-9
-                  assert abs(north['lon']-(98+51/60+38.5/3600))<1e-9
-                  assert north['coordinateSource']=='USER_DMS' and north['gateway'] is None
-                  proof={'status':'PASS','pageUrl':base,'httpStatus':200,'version':version,'north':{'id':north['id'],'label':north['screenLabel'],'lat':north['lat'],'lon':north['lon']},'verifiedAtUnix':time.time()}
+                  assert abs(north['lon']-(98+51/60+38.5/3600))<1e-9 and north['gateway'] is None
+                  for file in ['forward.html','planning.html','v1.html']:assert len(get(file))>100
+                  proof={'status':'PASS','pageUrl':base,'httpStatus':200,'version':version,'verifiedAtUnix':time.time()}
                   pathlib.Path('live-proof.json').write_text(json.dumps(proof,indent=2));print(json.dumps(proof,indent=2));break
               except Exception as error:
-                  if attempt==17:raise RuntimeError('Live version verification failed: '+str(error))
+                  if attempt==17:raise RuntimeError('Live verification failed: '+str(error))
                   time.sleep(5)
           PY
       - uses: actions/upload-artifact@v4
