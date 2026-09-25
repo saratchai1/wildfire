@@ -8,14 +8,14 @@
   const finite = n => typeof n === 'number' && Number.isFinite(n);
   function initial(plan) { return { view: 'dashboard', scenario: 'smoke', source: { ...plan.target }, sourceName: 'หมุดกลางภูเขา', windToDeg: 135, windSpeedMps: 2, smokeDelayMin: 0, availability: 'all', minute: 10, playing: false, selected: 'R03', acknowledgedAt: null }; }
   function validate(plan, state) {
-    if (!['dashboard', 'principles'].includes(state.view) || !['smoke', 'normal', 'dust', 'offline'].includes(state.scenario) || !['all', 'east', 'west', 'none'].includes(state.availability)) throw Error('Invalid scenario choice');
+    if (!['dashboard', 'principles'].includes(state.view) || !['smoke', 'normal', 'dust', 'offline'].includes(state.scenario) || !['all', 'east', 'west', 'north', 'none'].includes(state.availability)) throw Error('Invalid scenario choice');
     if (!state.source || !finite(state.source.lat) || !finite(state.source.lon) || Math.abs(state.source.lat) > 85 || Math.abs(state.source.lon) > 180 || Math.hypot(...C.delta(plan.target, state.source)) > plan.studyRadiusM + 0.1) throw Error('เลือกจุดเริ่มภายในวงพื้นที่ศึกษา 2 กม.');
     for (const [key, low, high] of [['windToDeg', 0, 359], ['windSpeedMps', 0, 8], ['smokeDelayMin', 0, 15], ['minute', 0, 60]]) if (!finite(state[key]) || state[key] < low || state[key] > high) throw Error('Invalid ' + key);
     if (!plan.stations.some(s => s.id === state.selected) || typeof state.playing !== 'boolean') throw Error('Invalid station or playback');
     if (state.acknowledgedAt !== null && (!finite(state.acknowledgedAt) || state.acknowledgedAt < 0 || state.acknowledgedAt > state.minute)) throw Error('Invalid acknowledgement time');
     return state;
   }
-  function enabled(station, state) { return state.availability === 'all' || state.availability === 'east' && station.side === 'E' || state.availability === 'west' && station.side === 'W'; }
+  function enabled(station, state) { return state.availability === 'all' || state.availability === 'east' && station.side === 'E' || state.availability === 'west' && station.side === 'W' || state.availability === 'north' && station.side === 'N'; }
   function prediction(plan, state) {
     validate(plan, state);
     const options = { ...S.defaults, windToDeg: state.windToDeg, windSpeedMps: state.windSpeedMps, horizonMin: 60 - state.smokeDelayMin };
@@ -60,7 +60,7 @@
     return out;
   }
   function events(plan, state, estimate = prediction(plan, state)) {
-    const out = [{ minute: 0, kind: 'START', title: 'เริ่มฉากจำลอง', detail: 'สถานีริมทาง 9 จุด · ไม่มีการรับข้อมูลจริง' }];
+    const out = [{ minute: 0, kind: 'START', title: 'เริ่มฉากจำลอง', detail: 'สถานีริมทาง ' + plan.stations.length + ' จุด · ไม่มีการรับข้อมูลจริง' }];
     if (state.scenario === 'smoke') {
       out.push({ minute: state.smokeDelayMin, kind: 'SMOKE', title: 'เริ่มมีควันในฉาก', detail: state.sourceName + ' · ตำแหน่งกำหนดไว้ ไม่ใช่ค้นพบต้นเพลิง' });
       for (const row of estimate.rows) if (row.alertMin !== null) out.push({ minute: row.alertMin, kind: 'SUSPECT', title: row.label + ' เข้าเกณฑ์ให้ตรวจสอบ', detail: 'PM + CO และเวลาอุปกรณ์ครบตามสูตรจำลอง' });

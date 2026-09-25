@@ -1,5 +1,5 @@
 {
-  "version": "roadside-2km-v3-north",
+  "version": "roadside-2km-v2",
   "status": "PROPOSED_FOR_FIELD_SURVEY",
   "target": {
     "lat": 18.8135555556,
@@ -326,46 +326,6 @@
       "reason": "เฝ้าระวังปลายแนวถนนด้านตะวันตกเฉียงใต้ใกล้ขอบพื้นที่ศึกษา",
       "fieldNote": "ยังไม่ยืนยันสิทธิ์เข้าถึงและติดตั้ง · สำรวจเงาต้นไม้/ภูเขา ไหล่ทาง และวิทยุ · ตำแหน่งเทียบภาพโดยประมาณ ±150 ม. ไม่ใช่รังวัด",
       "conditional": false
-    },
-    {
-      "id": "R10",
-      "screenLabel": "N1",
-      "label": "N1 · จุดเฝ้าระวังทิศเหนือ",
-      "side": "N",
-      "kit": "WX",
-      "lat": 18.831555555555557,
-      "lon": 98.86069444444443,
-      "elevationM": 1134,
-      "wayId": null,
-      "highway": "unknown",
-      "surface": "unknown",
-      "motorVehicle": "unknown",
-      "access": "unknown",
-      "osmTags": {},
-      "sampleId": "USER_DMS_N1",
-      "hintDistanceM": null,
-      "coordinateRole": "USER_SUPPLIED_COORDINATE_NOT_SURVEYED",
-      "coordinateSource": "USER_DMS",
-      "sourceDms": "18°49'53.6\"N 98°51'38.5\"E",
-      "distanceM": 2008.2,
-      "distanceModel": "LOCAL_EQUIRECTANGULAR_MEAN_EARTH",
-      "gateway": null,
-      "gatewayCandidates": [
-        "R01",
-        "R06"
-      ],
-      "radioStatus": "NOT_SURVEYED",
-      "nearbyRoad": {
-        "wayId": 1229003512,
-        "distanceM": 28.7,
-        "highway": "track",
-        "surface": "unpaved",
-        "motorVehicle": "private",
-        "source": "data/context.json simplified OSM geometry; NOT a surveyed road match"
-      },
-      "reason": "เพิ่มจุดรับควันและวัดลมด้านเหนือ ตามพิกัดผู้ใช้ โดยไม่ย้ายจุดเดิมหรือขยับหมุดเข้าถนนอัตโนมัติ",
-      "fieldNote": "พิกัดจากผู้ใช้โดยตรง ไม่ใช่จุดที่จับเข้ากึ่งกลางถนน · แนวทาง OSM ใกล้สุดประมาณ 29 ม. ระบุ motor_vehicle=private · ต้องตรวจแนวทาง สิทธิ์เข้าถึง แดด ไหล่ทาง และวิทยุ ก่อนเลือก Gateway; ยังไม่ยืนยันลิงก์สื่อสาร",
-      "conditional": true
     }
   ]
 }

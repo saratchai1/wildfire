@@ -8,18 +8,18 @@ try:
   browser=p.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1100},accept_downloads=True)
   page.on('pageerror',lambda e:errors.append(str(e)));page.route('https://**/*',lambda r:r.abort())
   page.goto('http://127.0.0.1:4173/planning.html',wait_until='networkidle')
-  page.wait_for_function('window.WildfireScreening && document.querySelectorAll("[data-map-node]").length === 9')
+  page.wait_for_function('window.WildfireScreening && document.querySelectorAll("[data-map-node]").length === 10')
   def set_range(selector,value):
    page.locator(selector).evaluate('(element,value)=>{element.value=String(value);element.dispatchEvent(new Event("input",{bubbles:true}));}',value)
   def plan():
-   expect(page.locator('[data-select]')).to_have_count(9)
+   expect(page.locator('[data-select]')).to_have_count(10)
    expect(page.locator('#study-area-layer path')).to_have_count(1)
    page.locator('[data-select="R03"]').click();expect(page.locator('.coordinates')).to_contain_text('18.8097818, 98.8656835')
    expect(page.locator('.field-note')).to_contain_text('motor_vehicle=private')
-   expect(page.locator('.metrics')).to_contain_text('860')
-   page.locator('[data-view="power"]').click();expect(page.locator('#energy-summary')).to_contain_text('9 / 9')
+   expect(page.locator('.metrics')).to_contain_text('940')
+   page.locator('[data-view="power"]').click();expect(page.locator('#energy-summary')).to_contain_text('10 / 10')
    page.locator('[data-view="plan"]').click()
-  record('Nine nearer road anchors, mapped study circle, restricted access and revised power budgets',plan)
+  record('Ten current road anchors, mapped study circle, restricted access and revised power budgets',plan)
   page.screenshot(path=str(qa/'v2-plan-desktop.jpg'),type='jpeg',quality=65,full_page=True)
   def analysis():
    page.locator('[data-view="analysis"]').click()
@@ -31,7 +31,7 @@ try:
    assert page.evaluate('WildfireScreening.getState().result.first.minutes')<3
    page.locator('#screen-source').select_option('center')
    page.locator('#screen-wind').focus();page.keyboard.press('Home')
-   assert page.evaluate('WildfireScreening.getState().result.status')=='NO_INTERCEPTION'
+   assert page.evaluate('WildfireScreening.getState().result.first.id')=='R10'
    page.locator('#screen-speed').focus();page.keyboard.press('Home')
    assert page.evaluate('WildfireScreening.getState().result.status')=='CALM_UNKNOWN'
    assert page.evaluate('WildfireScreening.getState().summary.unknown')==3152
@@ -42,7 +42,7 @@ try:
    page.locator('[data-screen-bearing="270"]').click();assert page.evaluate('WildfireScreening.getState().settings.windToDeg')==270
    page.locator('#screen-grid').uncheck();expect(page.locator('#study-area-layer circle')).to_have_count(1)
    page.locator('#screen-grid').check()
-  record('Full-domain deterministic screening, nearby case, northern miss, calm, unavailable, wind controls and overlay',analysis)
+  record('Full-domain deterministic screening, nearby case, northern interception, calm, unavailable, wind controls and overlay',analysis)
   page.screenshot(path=str(qa/'v2-screening-desktop.jpg'),type='jpeg',quality=60,full_page=True)
   def exports():
    for kind in ['geojson','kml','csv']:
@@ -50,12 +50,12 @@ try:
     with page.expect_download() as dl:page.locator('#export').click()
     file=qa/('v2-stations.'+kind);dl.value.save_as(file);text=file.read_text(encoding='utf-8-sig')
     if kind=='geojson':
-     data=json.loads(text);assert len(data['features'])==9;assert data['features'][0]['geometry']['coordinates']==[98.8712384,18.8189027];assert data['features'][0]['properties']['motor_vehicle']=='private'
-    elif kind=='kml':assert text.count('<Placemark>')==9
-    else:assert len(text.strip().splitlines())==10
+     data=json.loads(text);assert len(data['features'])==10;assert data['features'][0]['geometry']['coordinates']==[98.8712384,18.8189027];assert data['features'][0]['properties']['motor_vehicle']=='private'
+    elif kind=='kml':assert text.count('<Placemark>')==10
+    else:assert len(text.strip().splitlines())==11
    with page.expect_download() as dl:page.locator('#screen-export').click()
    file=qa/'v2-screening-export.json';dl.value.save_as(file);r=json.loads(file.read_text());assert r['summary']['total']==3152;assert r['fieldDetectionProbability'] is None;assert r['fieldLatencyVerified'] is False
-  record('Nine-coordinate GIS exports and complete reproducible screening export',exports)
+  record('Ten-coordinate GIS exports and complete reproducible screening export',exports)
   def demo():
    page.locator('[data-view="demo"]').click();page.locator('#source').select_option('R03');page.locator('[data-select="R03"]').click()
    expect(page.locator('.detail-alert')).to_contain_text('ยังไม่ยืนยันไฟ')
@@ -74,7 +74,7 @@ try:
    expect(page.locator('#screen-source')).to_be_visible();page.locator('#screen-source').select_option('north')
    page.screenshot(path=str(qa/'v2-screening-mobile.jpg'),type='jpeg',quality=60,full_page=True)
    page.locator('[data-view="plan"]').click();page.locator('#basemap').select_option('satellite')
-   expect(page.locator('#tile-error')).to_be_visible();expect(page.locator('[data-map-node]')).to_have_count(9)
+   expect(page.locator('#tile-error')).to_be_visible();expect(page.locator('[data-map-node]')).to_have_count(10)
   record('Mobile analysis layout and unavailable online imagery retain actual roads and all station markers',mobile)
   assert not errors,errors
   browser.close()
