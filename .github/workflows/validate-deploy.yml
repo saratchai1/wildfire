@@ -2,7 +2,7 @@ name: Validate and deploy roadside pilot
 on:
   workflow_dispatch:
   push:
-    branches: [main, design/roadside-2km-v2]
+    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3]
     paths-ignore: ['qa/**', 'README.md']
   pull_request:
     branches: [main]
@@ -15,44 +15,32 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Syntax and legacy plus v2 geospatial and model tests
+      - name: Syntax and shared-model plus preserved regression tests
         run: |
-          for f in core.js app.js siting.js siting-ui.js history.js; do node --check "$f"; done
+          for f in core.js app.js siting.js siting-ui.js history.js console-model.js console-map.js console.js; do node --check "$f"; done
           node --test tests/*.test.cjs
-          node scripts/assess_roadside_v2.cjs
-      - name: Build committed static application versions
+          node scripts/assess_roadside_v2.cjs > /tmp/roadside-screening.log
+      - name: Build committed static applications
         run: node scripts/build.cjs
       - name: Install browser test runtime
         run: |
           pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
-      - name: Browser proof for preserved v1 and nine-station v2
+      - name: Browser proof for v1 planning and two-part officer application
         run: |
           python -m http.server 4173 --directory site >/tmp/wildfire-http.log 2>&1 &
           python tests/browser.py
           python tests/history_browser.py
           python tests/siting_browser.py
-      - name: Record QA on development branch only
-        if: github.event_name == 'push' && github.ref == 'refs/heads/design/roadside-2km-v2'
-        run: |
-          git config user.name 'wildfire-qa-bot'
-          git config user.email 'wildfire-qa-bot@users.noreply.github.com'
-          git add qa/
-          git diff --cached --quiet && exit 0
-          git commit -m 'test: record complete v1 and v2 regression evidence [skip ci]'
-          git push origin HEAD:design/roadside-2km-v2
+          python tests/console_browser.py
       - name: Portable application
         run: cd site && zip -qr ../wildfire-roadside-pilot.zip .
       - uses: actions/upload-artifact@v4
@@ -80,10 +68,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/configure-pages@v5
-      - name: Deploy validated nine-station application
+      - name: Deploy validated two-part application
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live page and exact version
+      - name: Verify live two-part app and exact version
         env:
           SITE_URL: ${{ steps.deployment.outputs.page_url }}
           EXPECTED_SHA: ${{ github.sha }}
@@ -92,25 +80,22 @@ jobs:
           import json,os,time,urllib.request,pathlib
           base=os.environ['SITE_URL'].rstrip('/')+'/'
           expected=os.environ['EXPECTED_SHA']
-          last=None
           for attempt in range(18):
               try:
-                  url=base+'version.json?rev='+expected+'&attempt='+str(attempt)
-                  request=urllib.request.Request(url,headers={'Cache-Control':'no-cache','User-Agent':'Wildfire-Pages-Verification'})
-                  with urllib.request.urlopen(request,timeout=15) as r:
-                      version=json.load(r)
+                  request=urllib.request.Request(base+'version.json?rev='+expected+'&attempt='+str(attempt),headers={'Cache-Control':'no-cache','User-Agent':'Wildfire-Pages-Verification'})
+                  with urllib.request.urlopen(request,timeout=15) as r:version=json.load(r)
                   assert version['sourceCommit']==expected,version
+                  assert version['appVersion']=='operator-explainer-v3',version
                   assert version['planVersion']=='roadside-2km-v2' and version['stationCount']==9,version
-                  with urllib.request.urlopen(base+'?rev='+expected,timeout=15) as r:
-                      html=r.read().decode('utf-8')
-                  assert 'analysis-controls' in html and 'siting-ui.js' in html
+                  assert version['primaryViews']==['dashboard','principles'],version
+                  with urllib.request.urlopen(base+'?rev='+expected,timeout=15) as r:html=r.read().decode('utf-8')
+                  assert 'nav-dashboard' in html and 'nav-principles' in html and 'console-model.js' in html
+                  for file in ['console-model.js','console-map.js','console.js','console.css','planning.html','data/plan.js']:
+                      with urllib.request.urlopen(base+file+'?rev='+expected,timeout=15) as r:assert r.status==200 and len(r.read())>100
                   proof={'status':'PASS','pageUrl':base,'httpStatus':200,'version':version,'verifiedAtUnix':time.time()}
-                  pathlib.Path('live-proof.json').write_text(json.dumps(proof,indent=2))
-                  print(json.dumps(proof,indent=2))
-                  break
+                  pathlib.Path('live-proof.json').write_text(json.dumps(proof,indent=2));print(json.dumps(proof,indent=2));break
               except Exception as error:
-                  last=error
-                  if attempt==17:raise RuntimeError('Live version verification failed: '+str(last))
+                  if attempt==17:raise RuntimeError('Live version verification failed: '+str(error))
                   time.sleep(5)
           PY
       - uses: actions/upload-artifact@v4
