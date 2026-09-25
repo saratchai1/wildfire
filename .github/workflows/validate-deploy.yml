@@ -2,7 +2,7 @@ name: Validate and deploy roadside pilot
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, design/roadside-2km-v2]
     paths-ignore: ['qa/**', 'README.md']
   pull_request:
     branches: [main]
@@ -24,30 +24,50 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax and pure/geospatial integrity tests
-        run: |
-          node --check core.js
-          node --check app.js
-          node --check history.js
-          node --test tests/*.test.cjs
-      - name: Build static portable application
-        run: node scripts/build.cjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Prepare preserved v1 and new 2km application
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/prepare_roadside_v2.py')
+          t=p.read_text()
+          marker="assert 'RoadsideSiting.circle(plan.target' in app, 'fit point expression changed'"
+          insertion="app=app.replace('const points = [...stations, plan.target].map(p => C.world(p.lat, p.lon));', 'const points = window.RoadsideSiting.circle(plan.target, plan.studyRadiusM).map(p => C.world(p.lat, p.lon));')\n"
+          if insertion not in t:t=t.replace(marker,insertion+marker)
+          p.write_text(t)
+          p=Path('siting.js');p.write_text(p.read_text().replace('Math.exp(-cross**2/', 'Math.exp(-(cross**2)/'))
+          PY
+          python scripts/prepare_roadside_v2.py
+      - name: Syntax and legacy plus v2 geospatial and model tests
+        run: |
+          for f in core.js app.js siting.js siting-ui.js history.js; do node --check "$f"; done
+          node --test tests/*.test.cjs
+          node scripts/assess_roadside_v2.cjs
+      - name: Build both application versions
+        run: node scripts/build.cjs
       - name: Install browser test runtime
         run: |
           pip install playwright==1.55.0
           python -m playwright install --with-deps chromium
-      - name: Browser workflows with external maps deliberately unavailable
+      - name: Browser proof for preserved v1 and nine-station v2
         run: |
           python -m http.server 4173 --directory site >/tmp/wildfire-http.log 2>&1 &
           python tests/browser.py
           python tests/history_browser.py
-      - name: Portable offline-capable application
+          python tests/siting_browser.py
+      - name: Record generated v2 and test evidence on development branch only
+        if: github.event_name == 'push' && github.ref == 'refs/heads/design/roadside-2km-v2'
         run: |
-          cd site
-          zip -qr ../wildfire-roadside-pilot.zip .
+          git config user.name 'wildfire-qa-bot'
+          git config user.email 'wildfire-qa-bot@users.noreply.github.com'
+          git add index.html app.js app-v1.js core.js core-v1.js v1.html data/plan*.js data/plan-v2.json scripts/prepare_roadside_v2.py siting.js tests/core.test.cjs tests/history.test.cjs tests/browser.py tests/history_browser.py qa/
+          git diff --cached --quiet && exit 0
+          git commit -m 'feat: materialize tested nine-roadside-station 2km pilot and screening evidence [skip ci]'
+          git push origin HEAD:design/roadside-2km-v2
+      - name: Portable application
+        run: cd site && zip -qr ../wildfire-roadside-pilot.zip .
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -56,16 +76,6 @@ jobs:
             artifacts/
             qa/
             wildfire-roadside-pilot.zip
-      - name: Record successful browser proof in repository
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        run: |
-          git config user.name 'wildfire-qa-bot'
-          git config user.email 'wildfire-qa-bot@users.noreply.github.com'
-          git add qa/
-          git diff --cached --quiet && exit 0
-          git commit -m 'test: record browser proof and desktop/mobile previews [skip ci]'
-          git pull --rebase origin main
-          git push origin HEAD:main
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
@@ -82,10 +92,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Configure Pages (first enablement may need owner Settings)
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Deploy validated artifact
+      - uses: actions/configure-pages@v5
+      - name: Deploy validated nine-station application
         id: deployment
         uses: actions/deploy-pages@v4
