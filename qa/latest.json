@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "source_commit": "de893f8a54b7154e32001aef382705901ccfdbde",
+  "browser": "Chromium via Playwright",
+  "external_basemaps": "blocked deliberately; offline fallback tested",
+  "tests": [
+    {
+      "name": "Desktop list/map selection, survey status, zoom and side filtering",
+      "status": "PASS"
+    },
+    {
+      "name": "GeoJSON KML and CSV downloads preserve eight real coordinates",
+      "status": "PASS"
+    },
+    {
+      "name": "Synthetic smoke acknowledgement dust/offline guardrails wind and playback",
+      "status": "PASS"
+    },
+    {
+      "name": "Zero-sun generation deficit and increased-load autonomy failures are visible",
+      "status": "PASS"
+    },
+    {
+      "name": "Blocked external imagery retains offline terrain roads and station interaction",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile selection layout and energy table remain usable without page overflow",
+      "status": "PASS"
+    }
+  ],
+  "runtime_errors": [],
+  "field_commissioning": "NOT_PERFORMED"
+}
