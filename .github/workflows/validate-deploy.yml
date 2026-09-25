@@ -17,6 +17,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Capture exact source under review
+        run: |
+          git archive --format=zip --output=wildfire-source.zip HEAD
+          mkdir -p qa
+          git rev-parse HEAD > qa/validated-source-commit.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -24,9 +31,11 @@ jobs:
         with:
           python-version: '3.12'
       - name: Syntax and all observation/model/geospatial regression tests
+        shell: bash
         run: |
+          set -euo pipefail
           for f in core.js app.js siting.js siting-ui.js history.js console-model.js console-map.js console.js inverse-engine.js inverse-simulator.js inverse-worker.js inverse-ui.js; do node --check "$f"; done
-          node --test tests/*.test.cjs
+          node --test tests/*.test.cjs | tee qa/unit-tests.tap
           node scripts/assess_roadside_v2.cjs > /tmp/roadside-screening.log
       - name: Build committed static applications
         run: node scripts/build.cjs
@@ -42,6 +51,11 @@ jobs:
           python tests/siting_browser.py
           python tests/legacy_console_regression.py
           python tests/inverse_browser.py
+      - name: Require immutable application sources
+        if: always()
+        run: |
+          git diff --exit-code -- . ':!qa/**'
+          git diff --cached --exit-code -- . ':!qa/**'
       - name: Portable application
         run: cd site && zip -qr ../wildfire-roadside-pilot.zip .
       - uses: actions/upload-artifact@v4
@@ -51,6 +65,7 @@ jobs:
           path: |
             artifacts/
             qa/
+            wildfire-source.zip
             wildfire-roadside-pilot.zip
       - uses: actions/upload-pages-artifact@v3
         with:
