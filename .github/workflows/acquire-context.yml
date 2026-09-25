@@ -1,0 +1,38 @@
+name: Acquire public mapping context
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/acquire_context.py, .github/workflows/acquire-context.yml]
+permissions:
+  contents: write
+concurrency:
+  group: acquire-context
+  cancel-in-progress: false
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pillow==11.3.0
+      - name: Retrieve roads and terrain without fabricated fallbacks
+        run: python scripts/acquire_context.py
+      - name: Commit traceable snapshot only
+        run: |
+          git config user.name 'wildfire-data-bot'
+          git config user.email 'wildfire-data-bot@users.noreply.github.com'
+          git add data/
+          git diff --cached --quiet && exit 0
+          git commit -m 'data: snapshot OSM roads and Mapzen terrain for roadside site design'
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wildfire-context
+          path: data/
