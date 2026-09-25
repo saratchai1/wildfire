@@ -1,7 +1,6 @@
-"""Acquire reproducible public road/elevation context; never invent missing data."""
+"""Acquire public road/elevation context. Missing evidence is never synthesized."""
 import collections, datetime, hashlib, io, json, math, pathlib, time, urllib.parse, urllib.request
 from PIL import Image
-
 OUT=pathlib.Path('data'); OUT.mkdir(exist_ok=True)
 LAT,LON=18.8135555556,98.86225
 R=6371008.8
@@ -21,7 +20,8 @@ def dp(p,eps):
     m=max(ds,default=0)
     if m<=eps:return [p[0],p[-1]]
     i=ds.index(m)+1;return dp(p[:i+1],eps)[:-1]+dp(p[i:],eps)
-query='[out:json][timeout:45];(way["highway"](%s);node["tourism"~"viewpoint|camp_site"](%s);node["place"~"village|hamlet"](%s););out geom;'%(','.join(map(str,BBOX)),)*3
+bbox_text=','.join(map(str,BBOX))
+query=f'[out:json][timeout:45];(way["highway"]({bbox_text});node["tourism"~"viewpoint|camp_site"]({bbox_text});node["place"~"village|hamlet"]({bbox_text}););out geom;'
 raw=None
 for ep in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter','https://overpass.private.coffee/api/interpreter']:
     try:
@@ -29,7 +29,7 @@ for ep in ['https://overpass-api.de/api/interpreter','https://overpass.kumi.syst
         if not osm.get('elements'):raise RuntimeError('Empty OSM result')
         source=ep;break
     except Exception as e:print('Source unavailable:',ep,str(e),flush=True);time.sleep(3)
-else:raise RuntimeError('No road snapshot acquired; do not publish fabricated stations')
+else:raise RuntimeError('No road snapshot; do not publish fabricated stations')
 (OUT/'osm-source.json').write_bytes(raw)
 now=datetime.datetime.now(datetime.timezone.utc).isoformat()
 road_types={'primary','secondary','tertiary','unclassified','residential','service','primary_link','secondary_link','tertiary_link','living_street'}
@@ -57,22 +57,23 @@ for e in osm['elements']:
                 samples.append({'lat':round(lat,7),'lon':round(lon,7),'distance_m':round(dist),'bearing_deg':round(math.degrees(math.atan2(x,y))%360,1),'osm_way_id':e['id'],'highway':tags['highway'],'road_name':tags.get('name:th',tags.get('name',tags.get('ref','Unnamed mapped road'))),'surface':tags.get('surface','unknown'),'access':tags.get('access','unknown')})
             d+=150
         carry=d-length
-# Sparse shortlist: nearest eligible road point within each of 16 bearings, then additional near-target anchors.
 selected=[]
+def separated(s,previous,metres):
+    a=xy(s['lat'],s['lon'])
+    return all(math.hypot(a[0]-xy(p['lat'],p['lon'])[0],a[1]-xy(p['lat'],p['lon'])[1])>=metres for p in previous)
 for b in range(0,360,22):
-    choices=[s for s in samples if abs((s['bearing_deg']-b+180)%360-180)<=30 and all(math.hypot(*(a-b for a,b in zip(xy(s['lat'],s['lon']),xy(p['lat'],p['lon']))))>=300 for p in selected)]
+    choices=[s for s in samples if abs((s['bearing_deg']-b+180)%360-180)<=30 and separated(s,selected,300)]
     if choices:selected.append(min(choices,key=lambda s:s['distance_m']+8*abs((s['bearing_deg']-b+180)%360-180)))
 for s in sorted(samples,key=lambda s:s['distance_m']):
     if len(selected)>=24:break
-    if all(math.hypot(*(a-b for a,b in zip(xy(s['lat'],s['lon']),xy(p['lat'],p['lon']))))>=350 for p in selected):selected.append(s)
+    if separated(s,selected,350):selected.append(s)
 selected.sort(key=lambda s:s['bearing_deg'])
 for i,s in enumerate(selected,1):s['id']='C%02d'%i
-# Terrain: Mapzen Terrarium tiles. Data is real context, not a fire fuel or solar/shadow survey.
 terrain=None
 try:
-    z=12;n=2**z;cache={}
+    z=12;tiles=2**z;cache={}
     def elevation(lat,lon):
-        x=(lon+180)/360*n;y=(1-math.asinh(math.tan(math.radians(lat)))/math.pi)/2*n
+        x=(lon+180)/360*tiles;y=(1-math.asinh(math.tan(math.radians(lat)))/math.pi)/2*tiles
         tx,ty=int(x),int(y)
         if (tx,ty) not in cache:
             blob=get(f'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{tx}/{ty}.png',25)
