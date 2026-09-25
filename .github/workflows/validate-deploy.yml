@@ -2,7 +2,7 @@ name: Validate and deploy roadside pilot
 on:
   workflow_dispatch:
   push:
-    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3]
+    branches: [main, design/roadside-2km-v2, feature/operator-explainer-v3, feature/north-station-n1]
     paths-ignore: ['qa/**', 'README.md']
   pull_request:
     branches: [main]
@@ -41,6 +41,7 @@ jobs:
           python tests/history_browser.py
           python tests/siting_browser.py
           python tests/console_browser.py
+          python tests/north_browser.py
       - name: Portable application
         run: cd site && zip -qr ../wildfire-roadside-pilot.zip .
       - uses: actions/upload-artifact@v4
@@ -71,7 +72,7 @@ jobs:
       - name: Deploy validated two-part application
         id: deployment
         uses: actions/deploy-pages@v4
-      - name: Verify live two-part app and exact version
+      - name: Verify live two-part app and exact N1 version
         env:
           SITE_URL: ${{ steps.deployment.outputs.page_url }}
           EXPECTED_SHA: ${{ github.sha }}
@@ -86,13 +87,20 @@ jobs:
                   with urllib.request.urlopen(request,timeout=15) as r:version=json.load(r)
                   assert version['sourceCommit']==expected,version
                   assert version['appVersion']=='operator-explainer-v3',version
-                  assert version['planVersion']=='roadside-2km-v2' and version['stationCount']==9,version
+                  assert version['planVersion']=='roadside-2km-v3-north' and version['stationCount']==10,version
                   assert version['primaryViews']==['dashboard','principles'],version
                   with urllib.request.urlopen(base+'?rev='+expected,timeout=15) as r:html=r.read().decode('utf-8')
                   assert 'nav-dashboard' in html and 'nav-principles' in html and 'console-model.js' in html
                   for file in ['console-model.js','console-map.js','console.js','console.css','planning.html','data/plan.js']:
                       with urllib.request.urlopen(base+file+'?rev='+expected,timeout=15) as r:assert r.status==200 and len(r.read())>100
-                  proof={'status':'PASS','pageUrl':base,'httpStatus':200,'version':version,'verifiedAtUnix':time.time()}
+                  with urllib.request.urlopen(base+'data/plan-v2.json?rev='+expected,timeout=15) as r:plan=json.load(r)
+                  assert plan['version']=='roadside-2km-v3-north' and len(plan['stations'])==10
+                  north=next(s for s in plan['stations'] if s['id']=='R10')
+                  assert north['screenLabel']=='N1' and north['side']=='N'
+                  assert abs(north['lat']-(18+49/60+53.6/3600))<1e-9
+                  assert abs(north['lon']-(98+51/60+38.5/3600))<1e-9
+                  assert north['coordinateSource']=='USER_DMS' and north['gateway'] is None
+                  proof={'status':'PASS','pageUrl':base,'httpStatus':200,'version':version,'north':{'id':north['id'],'label':north['screenLabel'],'lat':north['lat'],'lon':north['lon']},'verifiedAtUnix':time.time()}
                   pathlib.Path('live-proof.json').write_text(json.dumps(proof,indent=2));print(json.dumps(proof,indent=2));break
               except Exception as error:
                   if attempt==17:raise RuntimeError('Live version verification failed: '+str(error))
