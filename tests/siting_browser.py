@@ -9,6 +9,8 @@ try:
   page.on('pageerror',lambda e:errors.append(str(e)));page.route('https://**/*',lambda r:r.abort())
   page.goto('http://127.0.0.1:4173/',wait_until='networkidle')
   page.wait_for_function('window.WildfireScreening && document.querySelectorAll("[data-map-node]").length === 9')
+  def set_range(selector,value):
+   page.locator(selector).evaluate('(element,value)=>{element.value=String(value);element.dispatchEvent(new Event("input",{bubbles:true}));}',value)
   def plan():
    expect(page.locator('[data-select]')).to_have_count(9)
    expect(page.locator('#study-area-layer path')).to_have_count(1)
@@ -36,8 +38,7 @@ try:
    page.locator('#screen-availability').select_option('none')
    assert page.evaluate('WildfireScreening.getState().result.status')=='NO_ACTIVE_STATIONS'
    page.locator('#screen-availability').select_option('all')
-   page.locator('#screen-speed').fill('2');page.locator('#screen-speed').dispatch_event('input')
-   page.locator('#screen-wind').fill('90');page.locator('#screen-wind').dispatch_event('input')
+   set_range('#screen-speed',2);set_range('#screen-wind',90)
    page.locator('[data-screen-bearing="270"]').click();assert page.evaluate('WildfireScreening.getState().settings.windToDeg')==270
    page.locator('#screen-grid').uncheck();expect(page.locator('#study-area-layer circle')).to_have_count(1)
    page.locator('#screen-grid').check()
@@ -59,8 +60,12 @@ try:
    page.locator('[data-view="demo"]').click();page.locator('#source').select_option('R03');page.locator('[data-select="R03"]').click()
    expect(page.locator('.detail-alert')).to_contain_text('ยังไม่ยืนยันไฟ')
    expect(page.locator('#acknowledge')).to_be_visible();page.locator('#acknowledge').click();expect(page.locator('#acknowledge')).to_be_disabled()
+   history=page.locator('.telemetry-history[data-station="R03"]');expect(history).to_be_visible()
+   assert history.locator('[data-series="pm"]').get_attribute('d').strip()
+   assert history.locator('[data-series="co"]').get_attribute('d').strip()
    page.locator('#scenario').select_option('offline');page.locator('[data-select="R09"]').click()
    expect(page.locator('.data-values')).to_contain_text('—');expect(page.locator('#demo-summary')).to_contain_text('ขาดข้อมูล 4 จุด')
+   expect(page.locator('.telemetry-history[data-station="R09"] .history-empty')).to_have_count(2)
    page.locator('[data-view="plan"]').click();assert page.locator('.data-values').count()==0
   record('Original-style PM CO timeline and offline handling preserved with new station positions',demo)
   def mobile():
