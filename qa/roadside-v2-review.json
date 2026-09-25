@@ -1,0 +1,773 @@
+{
+  "status": "DESKTOP_REVIEW_NOT_SURVEY",
+  "source_sha256": "55e80f17c003e4e6c2b239d53b8530c51ac98845e2e5cacc9a4478c884a49653",
+  "screen_hint_uncertainty_m": 150,
+  "metres_per_rendered_pixel": 3.7313432835820897,
+  "center": [
+    98.86225,
+    18.8135555556
+  ],
+  "radius_m": 2000,
+  "hints": [
+    {
+      "id": "W1",
+      "pixel": [
+        403,
+        270
+      ],
+      "hint_coordinate": [
+        98.8523947,
+        18.8209716
+      ],
+      "nearest": [
+        {
+          "wayId": 1112030805,
+          "distance_from_hint_m": 117.9,
+          "coordinate": [
+            98.8513756,
+            18.8205318
+          ],
+          "distance_to_target_m": 1382.7,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 1238533290,
+          "distance_from_hint_m": 546.1,
+          "coordinate": [
+            98.8518335,
+            18.8160892
+          ],
+          "distance_to_target_m": 1132.0,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade2"
+          }
+        },
+        {
+          "wayId": 696213524,
+          "distance_from_hint_m": 560.9,
+          "coordinate": [
+            98.8520193,
+            18.8159398
+          ],
+          "distance_to_target_m": 1109.0,
+          "tags": {
+            "description": "Narrow track only passable on m/c and is quite challenging.",
+            "dirtbike": "yes",
+            "highway": "path",
+            "loc_name": "Along Doi Pa Klong",
+            "source": "GPS",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 272517281,
+          "distance_from_hint_m": 574.8,
+          "coordinate": [
+            98.8469726,
+            18.8203514
+          ],
+          "distance_to_target_m": 1776.7,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "sac_scale": "?",
+            "source": "GPS;AllTrails",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        }
+      ]
+    },
+    {
+      "id": "W2",
+      "pixel": [
+        365,
+        470
+      ],
+      "hint_coordinate": [
+        98.8510476,
+        18.8142602
+      ],
+      "nearest": [
+        {
+          "wayId": 1238533290,
+          "distance_from_hint_m": 110.7,
+          "coordinate": [
+            98.8504127,
+            18.8150537
+          ],
+          "distance_to_target_m": 1257.0,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade2"
+          }
+        },
+        {
+          "wayId": 1112030805,
+          "distance_from_hint_m": 144.7,
+          "coordinate": [
+            98.850495,
+            18.8154519
+          ],
+          "distance_to_target_m": 1255.1,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 696213524,
+          "distance_from_hint_m": 207.7,
+          "coordinate": [
+            98.8522453,
+            18.8157444
+          ],
+          "distance_to_target_m": 1080.8,
+          "tags": {
+            "description": "Narrow track only passable on m/c and is quite challenging.",
+            "dirtbike": "yes",
+            "highway": "path",
+            "loc_name": "Along Doi Pa Klong",
+            "source": "GPS",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 231518529,
+          "distance_from_hint_m": 247.3,
+          "coordinate": [
+            98.8487085,
+            18.814048
+          ],
+          "distance_to_target_m": 1426.4,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "sac_scale": "?",
+            "source": "GPS;AllTrails",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "W3",
+      "pixel": [
+        340,
+        694
+      ],
+      "hint_coordinate": [
+        98.8501613,
+        18.8067435
+      ],
+      "nearest": [
+        {
+          "wayId": 1125539934,
+          "distance_from_hint_m": 47.4,
+          "coordinate": [
+            98.8505923,
+            18.8068676
+          ],
+          "distance_to_target_m": 1434.8,
+          "tags": {
+            "highway": "track",
+            "lit": "no",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "sac_scale": "?",
+            "source": "GPS;AllTrails",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade2"
+          }
+        },
+        {
+          "wayId": 1112045962,
+          "distance_from_hint_m": 293.5,
+          "coordinate": [
+            98.8487862,
+            18.8044469
+          ],
+          "distance_to_target_m": 1741.9,
+          "tags": {
+            "highway": "track",
+            "lit": "no",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade4",
+            "width": "4"
+          }
+        },
+        {
+          "wayId": 1017156920,
+          "distance_from_hint_m": 366.8,
+          "coordinate": [
+            98.8482658,
+            18.8039757
+          ],
+          "distance_to_target_m": 1816.9,
+          "tags": {
+            "highway": "track",
+            "lit": "no",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade4",
+            "width": "4"
+          }
+        },
+        {
+          "wayId": 231518529,
+          "distance_from_hint_m": 401.2,
+          "coordinate": [
+            98.8484318,
+            18.8099584
+          ],
+          "distance_to_target_m": 1508.4,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "sac_scale": "?",
+            "source": "GPS;AllTrails",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved",
+            "tracktype": "grade2"
+          }
+        }
+      ]
+    },
+    {
+      "id": "W4",
+      "pixel": [
+        311,
+        866
+      ],
+      "hint_coordinate": [
+        98.8491332,
+        18.8009718
+      ],
+      "nearest": [
+        {
+          "wayId": 964524419,
+          "distance_from_hint_m": 6.9,
+          "coordinate": [
+            98.8491976,
+            18.8009826
+          ],
+          "distance_to_target_m": 1960.1,
+          "tags": {
+            "highway": "residential",
+            "lit": "no",
+            "sidewalk": "no"
+          }
+        },
+        {
+          "wayId": 964524420,
+          "distance_from_hint_m": 54.7,
+          "coordinate": [
+            98.849643,
+            18.8008746
+          ],
+          "distance_to_target_m": 1936.2,
+          "tags": {
+            "dirtbike": "yes",
+            "highway": "residential",
+            "lit": "no",
+            "sac_scale": "?",
+            "source": "GPS;AllTrails",
+            "surface": "concrete",
+            "tracktype": "grade2"
+          }
+        },
+        {
+          "wayId": 964524418,
+          "distance_from_hint_m": 60.8,
+          "coordinate": [
+            98.8495933,
+            18.8006411
+          ],
+          "distance_to_target_m": 1958.8,
+          "tags": {
+            "highway": "service",
+            "lit": "no"
+          }
+        },
+        {
+          "wayId": 1433998651,
+          "distance_from_hint_m": 60.8,
+          "coordinate": [
+            98.8495933,
+            18.8006411
+          ],
+          "distance_to_target_m": 1958.8,
+          "tags": {
+            "highway": "unclassified",
+            "lit": "no",
+            "source": "GPS",
+            "surface": "concrete"
+          }
+        }
+      ]
+    },
+    {
+      "id": "E1",
+      "pixel": [
+        930,
+        330
+      ],
+      "hint_coordinate": [
+        98.8710772,
+        18.8189582
+      ],
+      "nearest": [
+        {
+          "wayId": 696213525,
+          "distance_from_hint_m": 18.0,
+          "coordinate": [
+            98.8712384,
+            18.8189027
+          ],
+          "distance_to_target_m": 1117.4,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note": "Changed to track as 4x4 can easily drive thru, & some precision added.",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 696213527,
+          "distance_from_hint_m": 26.9,
+          "coordinate": [
+            98.8713324,
+            18.8189479
+          ],
+          "distance_to_target_m": 1128.4,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note": "Changed to track as 4x4 can easily drive thru, & some precision added.",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 272518168,
+          "distance_from_hint_m": 203.3,
+          "coordinate": [
+            98.8710389,
+            18.8171305
+          ],
+          "distance_to_target_m": 1006.9,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 272518167,
+          "distance_from_hint_m": 247.7,
+          "coordinate": [
+            98.8731364,
+            18.8200375
+          ],
+          "distance_to_target_m": 1353.7,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        }
+      ]
+    },
+    {
+      "id": "E2",
+      "pixel": [
+        875,
+        420
+      ],
+      "hint_coordinate": [
+        98.8691274,
+        18.8159381
+      ],
+      "nearest": [
+        {
+          "wayId": 696213525,
+          "distance_from_hint_m": 38.5,
+          "coordinate": [
+            98.869423,
+            18.8157345
+          ],
+          "distance_to_target_m": 792.9,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note": "Changed to track as 4x4 can easily drive thru, & some precision added.",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 272518168,
+          "distance_from_hint_m": 178.6,
+          "coordinate": [
+            98.8705826,
+            18.8167645
+          ],
+          "distance_to_target_m": 946.8,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 1112045957,
+          "distance_from_hint_m": 327.7,
+          "coordinate": [
+            98.868657,
+            18.8130248
+          ],
+          "distance_to_target_m": 676.9,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 272518169,
+          "distance_from_hint_m": 369.9,
+          "coordinate": [
+            98.8694274,
+            18.8126238
+          ],
+          "distance_to_target_m": 762.5,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        }
+      ]
+    },
+    {
+      "id": "E3",
+      "pixel": [
+        775,
+        603
+      ],
+      "hint_coordinate": [
+        98.8655824,
+        18.8097972
+      ],
+      "nearest": [
+        {
+          "wayId": 696213512,
+          "distance_from_hint_m": 10.8,
+          "coordinate": [
+            98.8656835,
+            18.8097818
+          ],
+          "distance_to_target_m": 553.8,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 1125539938,
+          "distance_from_hint_m": 57.8,
+          "coordinate": [
+            98.8655787,
+            18.8103166
+          ],
+          "distance_to_target_m": 502.5,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 1331589774,
+          "distance_from_hint_m": 57.8,
+          "coordinate": [
+            98.8655787,
+            18.8103166
+          ],
+          "distance_to_target_m": 502.5,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 255517025,
+          "distance_from_hint_m": 161.9,
+          "coordinate": [
+            98.8671122,
+            18.8096481
+          ],
+          "distance_to_target_m": 671.3,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        }
+      ]
+    },
+    {
+      "id": "E4",
+      "pixel": [
+        806,
+        760
+      ],
+      "hint_coordinate": [
+        98.8666813,
+        18.8045288
+      ],
+      "nearest": [
+        {
+          "wayId": 255517026,
+          "distance_from_hint_m": 99.7,
+          "coordinate": [
+            98.8676286,
+            18.8045497
+          ],
+          "distance_to_target_m": 1150.4,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 255517173,
+          "distance_from_hint_m": 173.1,
+          "coordinate": [
+            98.8668866,
+            18.802984
+          ],
+          "distance_to_target_m": 1272.8,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 255517024,
+          "distance_from_hint_m": 198.3,
+          "coordinate": [
+            98.8684718,
+            18.8039744
+          ],
+          "distance_to_target_m": 1250.6,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 696213511,
+          "distance_from_hint_m": 279.4,
+          "coordinate": [
+            98.8689924,
+            18.8032935
+          ],
+          "distance_to_target_m": 1343.8,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        }
+      ]
+    },
+    {
+      "id": "E5",
+      "pixel": [
+        760,
+        927
+      ],
+      "hint_coordinate": [
+        98.8650506,
+        18.7989248
+      ],
+      "nearest": [
+        {
+          "wayId": 1215941741,
+          "distance_from_hint_m": 107.2,
+          "coordinate": [
+            98.8653743,
+            18.7980103
+          ],
+          "distance_to_target_m": 1759.6,
+          "tags": {
+            "highway": "track",
+            "lit": "no",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "sac_scale": "?",
+            "source": "GPS;AllTrails",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 385538315,
+          "distance_from_hint_m": 110.6,
+          "coordinate": [
+            98.8659132,
+            18.7983575
+          ],
+          "distance_to_target_m": 1733.4,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "smoothness": "horrible",
+            "source": "GPS",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 1215941742,
+          "distance_from_hint_m": 113.5,
+          "coordinate": [
+            98.8656402,
+            18.7980701
+          ],
+          "distance_to_target_m": 1758.5,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "source": "GPS",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        },
+        {
+          "wayId": 1215941744,
+          "distance_from_hint_m": 113.9,
+          "coordinate": [
+            98.8659056,
+            18.7982967
+          ],
+          "distance_to_target_m": 1739.8,
+          "tags": {
+            "highway": "track",
+            "motor_vehicle": "private",
+            "note:motor_vehicle": "Inside Doi Suthep-Pui NP; pre-existing agricultural access; no public motor vehicle access",
+            "sac_scale": "?",
+            "smoothness": "horrible",
+            "source": "GPS;AllTrails",
+            "source:geometry": "strava",
+            "source:motor_vehicle": "National Park Act B.E. 2562 (2019) Sections 64-65",
+            "surface": "unpaved"
+          }
+        }
+      ]
+    }
+  ]
+}
