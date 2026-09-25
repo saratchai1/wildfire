@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "source_commit": "de893f8a54b7154e32001aef382705901ccfdbde",
+  "source_commit": "9681cc273b066ca021d53b3429836e3e7a364b98",
   "browser": "Chromium via Playwright",
   "external_basemaps": "blocked deliberately; offline fallback tested",
   "tests": [
@@ -27,8 +27,13 @@
     {
       "name": "Mobile selection layout and energy table remain usable without page overflow",
       "status": "PASS"
+    },
+    {
+      "name": "Legacy-inspired PM/CO history, chronological network events, stale gaps, acknowledgement, restart and mobile layout",
+      "status": "PASS"
     }
   ],
   "runtime_errors": [],
-  "field_commissioning": "NOT_PERFORMED"
+  "field_commissioning": "NOT_PERFORMED",
+  "history_source_commit": "9681cc273b066ca021d53b3429836e3e7a364b98"
 }
