@@ -12,8 +12,11 @@ try:
   def wait():page.wait_for_function('window.WildfireInverseApp && !WildfireInverseApp.getState().busy && WildfireInverseApp.getState().report',timeout=60000)
   def state():return page.evaluate('WildfireInverseApp.getState()')
   def load(name):
-   page.locator('#import-file').set_input_files(str(qa/'review-inputs'/(name+'.json')));wait()
+   old=state()['requestId']
+   page.locator('#import-file').set_input_files(str(qa/'review-inputs'/(name+'.json')))
+   page.wait_for_function('(n)=>WildfireInverseApp.getState().requestId>n && !WildfireInverseApp.getState().busy',arg=old,timeout=60000);wait()
   wait();page.locator('.import-panel summary').click();load('cadence-10s')
+  assert len(page.workers)==1, 'Review integration requires a live dedicated worker'
   assert state()['report']['currentAnomalousStations']==['R01','R02'];expect(page.locator('#support')).to_contain_text('2')
   checks.append('R1: 10-second telemetry is sustained smoke, not particulate-only')
   load('last-packet-stale');s=state();assert s['report']['online']==8
