@@ -27,25 +27,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Prepare preserved v1 and new 2km application
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p=Path('scripts/prepare_roadside_v2.py')
-          t=p.read_text()
-          marker="assert 'RoadsideSiting.circle(plan.target' in app, 'fit point expression changed'"
-          insertion="app=app.replace('const points = [...stations, plan.target].map(p => C.world(p.lat, p.lon));', 'const points = window.RoadsideSiting.circle(plan.target, plan.studyRadiusM).map(p => C.world(p.lat, p.lon));')\n"
-          if insertion not in t:t=t.replace(marker,insertion+marker)
-          p.write_text(t)
-          p=Path('siting.js');p.write_text(p.read_text().replace('Math.exp(-cross**2/', 'Math.exp(-(cross**2)/'))
-          PY
-          python scripts/prepare_roadside_v2.py
       - name: Syntax and legacy plus v2 geospatial and model tests
         run: |
           for f in core.js app.js siting.js siting-ui.js history.js; do node --check "$f"; done
           node --test tests/*.test.cjs
           node scripts/assess_roadside_v2.cjs
-      - name: Build both application versions
+      - name: Build committed static application versions
         run: node scripts/build.cjs
       - name: Install browser test runtime
         run: |
@@ -57,14 +44,14 @@ jobs:
           python tests/browser.py
           python tests/history_browser.py
           python tests/siting_browser.py
-      - name: Record generated v2 and test evidence on development branch only
+      - name: Record QA on development branch only
         if: github.event_name == 'push' && github.ref == 'refs/heads/design/roadside-2km-v2'
         run: |
           git config user.name 'wildfire-qa-bot'
           git config user.email 'wildfire-qa-bot@users.noreply.github.com'
-          git add index.html app.js app-v1.js core.js core-v1.js v1.html data/plan*.js data/plan-v2.json scripts/prepare_roadside_v2.py siting.js tests/core.test.cjs tests/history.test.cjs tests/browser.py tests/history_browser.py qa/
+          git add qa/
           git diff --cached --quiet && exit 0
-          git commit -m 'feat: materialize tested nine-roadside-station 2km pilot and screening evidence [skip ci]'
+          git commit -m 'test: record complete v1 and v2 regression evidence [skip ci]'
           git push origin HEAD:design/roadside-2km-v2
       - name: Portable application
         run: cd site && zip -qr ../wildfire-roadside-pilot.zip .
@@ -96,3 +83,37 @@ jobs:
       - name: Deploy validated nine-station application
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify live page and exact version
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json,os,time,urllib.request,pathlib
+          base=os.environ['SITE_URL'].rstrip('/')+'/'
+          expected=os.environ['EXPECTED_SHA']
+          last=None
+          for attempt in range(18):
+              try:
+                  url=base+'version.json?rev='+expected+'&attempt='+str(attempt)
+                  request=urllib.request.Request(url,headers={'Cache-Control':'no-cache','User-Agent':'Wildfire-Pages-Verification'})
+                  with urllib.request.urlopen(request,timeout=15) as r:
+                      version=json.load(r)
+                  assert version['sourceCommit']==expected,version
+                  assert version['planVersion']=='roadside-2km-v2' and version['stationCount']==9,version
+                  with urllib.request.urlopen(base+'?rev='+expected,timeout=15) as r:
+                      html=r.read().decode('utf-8')
+                  assert 'analysis-controls' in html and 'siting-ui.js' in html
+                  proof={'status':'PASS','pageUrl':base,'httpStatus':200,'version':version,'verifiedAtUnix':time.time()}
+                  pathlib.Path('live-proof.json').write_text(json.dumps(proof,indent=2))
+                  print(json.dumps(proof,indent=2))
+                  break
+              except Exception as error:
+                  last=error
+                  if attempt==17:raise RuntimeError('Live version verification failed: '+str(last))
+                  time.sleep(5)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wildfire-live-deployment-proof
+          path: live-proof.json
