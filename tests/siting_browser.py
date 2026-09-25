@@ -1,4 +1,4 @@
-"""Browser evidence for v2, in addition to preserved v1 regression tests."""
+"""Browser evidence for preserved v2 planning UI, in addition to v1 and the two-part console."""
 import json,os,pathlib
 from playwright.sync_api import sync_playwright,expect
 results=[];errors=[];qa=pathlib.Path('qa');qa.mkdir(exist_ok=True)
@@ -7,7 +7,7 @@ try:
  with sync_playwright() as p:
   browser=p.chromium.launch();page=browser.new_page(viewport={'width':1440,'height':1100},accept_downloads=True)
   page.on('pageerror',lambda e:errors.append(str(e)));page.route('https://**/*',lambda r:r.abort())
-  page.goto('http://127.0.0.1:4173/',wait_until='networkidle')
+  page.goto('http://127.0.0.1:4173/planning.html',wait_until='networkidle')
   page.wait_for_function('window.WildfireScreening && document.querySelectorAll("[data-map-node]").length === 9')
   def set_range(selector,value):
    page.locator(selector).evaluate('(element,value)=>{element.value=String(value);element.dispatchEvent(new Event("input",{bubbles:true}));}',value)

@@ -1,0 +1,28 @@
+# Two-part application — operator-explainer-v3
+
+## Accepted scope
+The primary website has exactly two sections: (1) an officer-facing simulated incident dashboard and (2) an explanation of fire/smoke, wind directions and conditional minutes to an alert. Preserve the nine roadside solar station coordinates and the 2 km study area. No changes to bdteamditto/fire, no new field performance claims and no backend/dispatch.
+
+## Architecture decisions
+- `index.html#dashboard` is the default, with `index.html#principles` as the second primary view. Browser back/forward and direct hashes work. The older design tool remains at `planning.html`; the older eight-node version remains at `v1.html`. Planning and power are secondary links, not extra primary tabs.
+- `console-model.js` is a pure adapter using the existing `RoadsideSiting.legacyReading`, `legacyFirst`, `screen`, `WildfireCore` and canonical `data/plan.js`. No re-tuning emissions, thresholds, attenuation or station coordinates. `console-map.js` renders the bundled real OSM/DEM with optional online imagery. `console.js` owns one shared scenario state for the two views.
+- PM and CO are distinct quantities/charts. The dashboard default is a paused smoke scenario at T+10 minutes, center source, wind TO 135 degrees at 2 m/s. Its alerts come from the same model as the explanatory table, not a second set of scripted numbers.
+
+## Time/data contract
+T+0 is hypothetical ignition. `smokeDelayMin` (0 by default, explicitly assumed immediate smoke release) is added once. The original synthetic kernel supplies time since smoke release to crossing the paired PM/CO threshold on a 0.5-minute evaluation grid. The existing screening convention adds 30 s sampling allowance + 60 s persistence + 30 s uplink = 2 min. This is a declared conservative illustrative allowance, not measured hardware latency or a guarantee. Under the constant-wind monotone synthetic plume, crossing persists; changing any scenario input starts a new scenario and clears acknowledgements. Varying wind is NOT assimilated into a continuous physical simulation.
+
+Geometric smoke-arrival time = smoke delay + downwind distance / wind speed. It is displayed separately from the alert calculation; do NOT add that time a second time to concentration-threshold crossing. The first geometric station may differ from the first threshold station; both IDs remain visible. The geometric cone has its own declared 20 degree half-angle, unrelated to the Gaussian width in the legacy concentration formula. All eight direction comparisons recompute from the same source, speed, smoke delay and availability; there are no pre-filled latency numbers.
+
+Null is not zero. Calm/unknown transport, excluded stations, no geometric interception and no threshold crossing inside 60 minutes have separate explanations. No claim that silence means no fire. The display never automatically confirms a real fire. No observed live wind, fuel data, field detection probability or measured coverage exists in this demo. The 2 km outline is a study area only. A spread outline, if enabled, is separately labeled illustrative, not a smoke trajectory or safety perimeter.
+
+## Workflow contract
+One scenario state is shared by both views. Parameter changes pause playback, rewind to zero and clear acknowledgement; view changes pause playback while retaining the scenario/time. Rewinding time clears acknowledgement. Acknowledge is allowed only after a visible synthetic alert and lives in memory for this page only. No remote writes, localStorage assertion, real alarm or dispatch. Playback stops when the tab is hidden and at 60 minutes. Normal/dust/offline presets never fabricate confirmed events. The principles view always analyzes a hypothetical fire; its button explicitly activates that scenario in the officer view.
+
+## UI acceptance
+Two primary navigation entries only. Dashboard: status summary, actual roadside map, station status list, PM/CO history, scenario clock, wind and event timeline. Explainer: source selection (including keyboard-friendly coordinate fields), wind TO compass, speed, smoke onset delay, two distinct time cards, first station IDs, an eight-direction table and short process explanation. Same scene can be replayed in the dashboard. Inputs, maps and tables work at 375 px. Offline imagery failure retains real roads/terrain. Field approval and energy information remain in the planning tool.
+
+## Verification and rollout
+Preserve all v1/v2 regression tests (v2 UI now under planning.html). Add pure tests for shared timing, ignition/smoke conversion, alert boundaries, direction order, source bounds, calm, no active stations, dust/offline, no future events, ack reset and invalid inputs. Browser-test both views, shared inputs, all eight bearings, direct URLs, back/forward, playback, acknowledgement, PM/CO chart gaps, export, 375 px layout and blocked online tiles. CI must pass before merge. Deploy must verify `appVersion=operator-explainer-v3`, unchanged plan version and 9 stations plus new assets. Test success is not field commissioning.
+
+## References and interpretation
+Legacy model: bdteamditto/fire at 1a38fffa105dbc12763f39ae364fdaeb5e0697de, and current `siting.js`. The model is illustrative; it does not resolve plume rise, canopy, turbulence, variable wind, ignition growth, or human verification delay. Complex terrain affects local wind; primary reference: https://research.fs.usda.gov/firelab/products/dataandtools/windninja (reviewed 2026-09-25). WindNinja is NOT executed by this app. GitHub deployment reference: https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages .
