@@ -40,3 +40,13 @@ CI รัน unit/model/geospatial และ browser regression ก่อน dep
 
 Build รุ่นนี้: `node --test tests/*.test.cjs` → `node scripts/benchmark_v2a.cjs` → `node scripts/build.cjs`
 จากนั้นเปิด HTTP server จาก `site/` ตามเดิม; ทดสอบเพิ่มเติม `python tests/bayes_browser.py`
+
+## V1.2 — หลักฐานก่อนตำแหน่ง
+
+แดชบอร์ดใช้ V1.1 เดิมเป็นตัวค้นหาพื้นที่ พร้อมชั้นเฝ้าดู V1.2 ที่ไม่เปลี่ยนเกณฑ์แจ้ง
+ดูสัญญาณได้ก่อนการหาตำแหน่งเสร็จ แยกเวลาวัดจากเวลาที่หลักฐานมาถึงครบ
+พักข้อมูลแล้วกดตรวจความไว: ตัดข้อมูลทีละสถานี, ลม ±10°, และ stress test ของสถานีเงียบ
+แสดงสถานีที่คำตอบขึ้นกับมาก โดยไม่เปลี่ยนพื้นที่หรืออ้างว่าแม่นขึ้น
+V2A เลือกได้ในห้องทดลองเท่านั้น กลับหน้าเจ้าหน้าที่คืนตัวหลักและซ่อนเฉลย
+เพิ่ม `node scripts/benchmark_assessment.cjs` ก่อน build และ `python tests/assessment_browser.py` ในชุด browser
+[ข้อกำหนดและข้อจำกัด V1.2](docs/EVIDENCE_FIRST_V12.md)

@@ -16,7 +16,7 @@ try:
   def seek(minute):
    page.locator('#minute').evaluate('(e,v)=>{e.value=v;e.dispatchEvent(new Event("input",{bubbles:true}));}',str(minute));wait()
   wait();assert state()['algorithm']=='baseline';oldtime=state()['report']['asOf'];oldsignal=state()['report']['anomalousStations']
-  change_model('v2a');r=state()['report'];assert r['modelVersion']=='bayes-grid-v2a.1' and r['asOf']==oldtime
+  page.locator('#nav-principles').click();change_model('v2a');r=state()['report'];assert r['modelVersion']=='bayes-grid-v2a.1' and r['asOf']==oldtime
   assert r['anomalousStations']==oldsignal;assert len(page.workers)==1
   expect(page.locator('#model-badge')).to_contain_text('ทดลอง');expect(page.locator('#model-diagnostics')).to_contain_text('ไม่ใช่โอกาส')
   expect(page.locator('[data-truth-pin]')).to_have_count(0)
@@ -43,10 +43,11 @@ try:
   page.locator('#load-benchmark').click();expect(page.locator('#benchmark-results')).to_contain_text('39',timeout=10000)
   expect(page.locator('#benchmark-results')).to_contain_text('ยังไม่เลื่อน')
   page.screenshot(path=str(qa/'bayes-principles-desktop.jpg'),type='jpeg',quality=75,full_page=True)
-  page.locator('#replay').click();expect(page.locator('[data-truth-pin]')).to_have_count(0)
+  page.locator('#replay').click();page.wait_for_function("WildfireInverseApp.getState().view==='dashboard' && WildfireInverseApp.getState().algorithm==='baseline'");wait();expect(page.locator('[data-truth-pin]')).to_have_count(0)
+  assert state()['algorithm']=='baseline';expect(page.locator('#experimental-models')).to_be_hidden()
   checks.append('Variable-release laboratory, reveal boundary and complete mixed benchmark results')
   seek(0);assert state()['report']['firstSignalAt'] is None;expect(page.locator('#ack')).to_be_disabled()
-  page.locator('#model-choice').select_option('baseline');page.locator('#model-choice').select_option('v2a');wait()
+  page.locator('#nav-principles').click();page.locator('#model-choice').select_option('baseline');page.locator('#model-choice').select_option('v2a');wait()
   assert state()['algorithm']=='v2a' and state()['report']['modelVersion']=='bayes-grid-v2a.1'
   assert state()['report']['asOf'].startswith('2026-03-15T06:00:')
   checks.append('Rewind and rapid model switch cannot apply obsolete inference results')
