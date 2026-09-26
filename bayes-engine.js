@@ -187,7 +187,7 @@
       sampleCount: samples.length, solverPositiveCount: samples.filter(r => r.dp > 25 && r.dc > .2).length,
       solverSupportStationIds: [...new Set(samples.filter(r => r.dp > 25 && r.dc > .2).map(r => r.stationId))],
       discardedRecords: p.rejected, futureRecordsExcluded: p.future, cells: [], zones: [],
-      assessmentDataStatus: e.incident.dataGapStationIds.length ? 'HISTORICAL_EVIDENCE_DATA_GAP' : e.alerts.length ? 'CURRENT_AND_RECENT_EVIDENCE' : 'HISTORICAL_EVIDENCE',
+      assessmentDataStatus: !support.length ? 'NO_RECENT_EVIDENCE' : e.incident.dataGapStationIds.length ? 'HISTORICAL_EVIDENCE_DATA_GAP' : e.alerts.length ? 'CURRENT_AND_RECENT_EVIDENCE' : 'HISTORICAL_EVIDENCE',
       supportDataThrough: e.incident.lastConfirmedAt, sensorModels: [...models.values()], searchRadiusM: 4000,
       resolutionM: 200, refinementM: 100, singleSourceAssumption: true,
       warnings: ['EXPERIMENTAL_CHALLENGER', 'NOT_A_FIRE_CONFIRMATION', 'CONDITIONAL_MODEL_MASS_NOT_CALIBRATED_COVERAGE', 'NO_TERRAIN_OR_CANOPY_DISPERSION_SOLVER', 'SENSOR_MODELS_NOT_FIELD_CALIBRATED'],
