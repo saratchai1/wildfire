@@ -34,11 +34,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in core.js app.js siting.js siting-ui.js history.js console-model.js console-map.js console.js inverse-engine.js inverse-simulator.js inverse-worker.js inverse-ui.js bayes-engine.js bayes-worker.js bayes-panel.js v2a-simulator.js; do node --check "$f"; done
+          for f in core.js app.js siting.js siting-ui.js history.js console-model.js console-map.js console.js inverse-engine.js inverse-simulator.js inverse-worker.js inverse-ui.js bayes-engine.js bayes-worker.js bayes-panel.js v2a-simulator.js terrain-physics.js terrain-inverse.js terrain-worker.js terrain-ui.js calibration.js; do node --check "$f"; done
           node --test tests/*.test.cjs | tee qa/unit-tests.tap
           node scripts/assess_roadside_v2.cjs > /tmp/roadside-screening.log
       - name: Publish all fixed V2A benchmark cases including misses
         run: node scripts/benchmark_v2a.cjs > qa/v2a-benchmark.log
+      - name: Evaluate experimental terrain cases without promotion
+        run: node scripts/benchmark_terrain.cjs > qa/v2b-benchmark.log
       - name: Build committed static applications
         run: node scripts/build.cjs
       - name: Install browser test runtime
@@ -55,6 +57,7 @@ jobs:
           python tests/inverse_browser.py
           python tests/review_browser.py
           python tests/bayes_browser.py
+          python tests/terrain_browser.py
       - name: Require immutable application sources
         if: always()
         run: |
@@ -113,6 +116,7 @@ jobs:
                   assert version['modelVersion']=='inverse-footprint-v1.1-evidence',version
                   assert version['challengerVersion']=='bayes-grid-v2a.1' and version['defaultAlgorithm']=='baseline',version
                   assert version['primaryViews']==['dashboard','principles'] and version['fieldValidated'] is False
+                  assert version['experimentalTerrain']['version']=='terrain-inverse-v2b.0' and version['experimentalTerrain']['promoted'] is False
                   for file,digest in version['assets'].items():
                       assert hashlib.sha256(get(file)).hexdigest()==digest,file
                   html=get('index.html').decode('utf-8')
