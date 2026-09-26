@@ -20,6 +20,7 @@
 ## พัฒนาและทดสอบ
 ```sh
 node --test tests/*.test.cjs
+node scripts/benchmark_v2a.cjs
 node scripts/build.cjs
 python -m http.server 4173 --directory site
 ```
@@ -28,3 +29,14 @@ Browser suite ต้องมี Playwright/Chromium: tests/browser.py, tests/hi
 [Design / Observation contract / assumptions / limitations](docs/INVERSE_SOURCE.md) · [N1](docs/NORTH_STATION.md)
 
 CI รัน unit/model/geospatial และ browser regression ก่อน deploy ตรวจ commit/appVersion/assets SHA-256 กับเว็บจริงหลัง deploy ผลและภาพ desktop/mobile อยู่ Actions artifact `wildfire-qa-and-portable-app`. Tests ผ่านไม่เท่ากับการพิสูจน์ความแม่นยำภาคสนาม
+
+## V2A — รุ่นทดลอง Bayesian (ยังไม่แทนค่าเริ่มต้น)
+
+เลือกรุ่น V2A จากแถบอัลกอริทึม หรือกดเทียบสองโมเดลบนข้อมูลชุดเดียวกัน
+ปรับความคลาดเคลื่อน/เวลาตอบสนองรายสถานี และทดลองควันแบบเพิ่มขึ้นหรือปล่อยเป็นช่วง
+ผลชุดเปรียบเทียบทุกฉากแสดงในส่วนหลักการ; พื้นที่เล็กลงไม่ใช่ความแม่นยำสูงขึ้นโดยอัตโนมัติ
+ค่าเริ่มต้นยังเป็น V1.1 เพราะชุดพัฒนาพบว่า V2A พลาดต้นทางมากกว่า แม้เสนอพื้นที่เล็กกว่า
+[Design V2A](docs/V2A_BAYESIAN.md) — ยังไม่มีลมตามภูเขาหรือผลภาคสนาม
+
+Build รุ่นนี้: `node --test tests/*.test.cjs` → `node scripts/benchmark_v2a.cjs` → `node scripts/build.cjs`
+จากนั้นเปิด HTTP server จาก `site/` ตามเดิม; ทดสอบเพิ่มเติม `python tests/bayes_browser.py`

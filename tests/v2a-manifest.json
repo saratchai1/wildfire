@@ -1,0 +1,20 @@
+{
+  "version":"v2a-blind-suite-1",
+  "frozenBeforeComparison":true,
+  "minutes":[15,25,40],
+  "cases":[
+    {"id":"steady-offgrid","generator":"legacy","preset":"single","point":[-313,211],"seed":109},
+    {"id":"turning-wind","generator":"legacy","preset":"changing","point":[-177,95],"seed":307},
+    {"id":"noisy-delayed","generator":"legacy","preset":"noise","point":[188,-432],"seed":509},
+    {"id":"outside-domain","generator":"legacy","preset":"outside","seed":701},
+    {"id":"two-sources","generator":"legacy","preset":"multiple","seed":809},
+    {"id":"one-receptor","generator":"legacy","preset":"single-sensor","seed":907},
+    {"id":"calm","generator":"legacy","preset":"calm","seed":1103},
+    {"id":"road-dust","generator":"legacy","preset":"dust","seed":1301,"noFire":true},
+    {"id":"background","generator":"legacy","preset":"none","seed":1601,"noFire":true},
+    {"id":"finite-pulse","generator":"stress","preset":"pulse","point":[-363,113],"seed":1901},
+    {"id":"growing-release","generator":"stress","preset":"ramp","point":[-197,217],"seed":2003},
+    {"id":"intermittent-gap","generator":"stress","preset":"intermittent","point":[-317,157],"seed":2309},
+    {"id":"receptor-delay","generator":"stress","preset":"sensor-lag","point":[-283,181],"seed":2707,"sensorModels":[{"stationId":"R02","responseLagSec":60}]}
+  ]
+}

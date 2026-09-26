@@ -1,12 +1,13 @@
 /* Two views; truth belongs to the laboratory only. The inference worker receives observations only. */
 (function(){
 'use strict';
+const Router=window.WildfireModelRouter;
 const P=window.WILDFIRE_PLAN,C=window.WildfireCore,I=window.WildfireInverse,G=window.WildfireSimulator,$=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
 const f=(n,d=1)=>Number.isFinite(n)?n.toFixed(d):'—';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const time=t=>t?new Date(t).toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok',hour12:false}):'—';
 const statuses={PENDING:['PM และ CO สูง กำลังรอยืนยันความต่อเนื่อง','ยังไม่ครบช่วงหลักฐาน 30 วินาที ไม่จัดเป็นฝุ่นอย่างเดียว'],SIGNAL_HISTORY:['เคยพบสัญญาณควัน เหตุยังไม่ปิด','ไม่มีหลักฐานปัจจุบันที่เพียงพอ ไม่ใช่การยืนยันว่าไม่มีไฟ'],NO_SIGNAL:['ยังไม่พบสัญญาณควันตามเกณฑ์','ไม่ใช่การยืนยันว่าไม่มีไฟ โดยเฉพาะจุดที่ควันไม่ผ่านสถานี'],PARTICULATE_ONLY:['พบฝุ่นเพิ่ม แต่ยังไม่มีหลักฐานควันคู่ PM + CO','ตรวจสอบกิจกรรมริมทางและคุณภาพข้อมูลก่อนสรุป'],INSUFFICIENT_DATA:['ข้อมูลยังไม่เพียงพอ','ข้อมูลขาดหรือประวัติสั้นเกินไป ไม่แทนค่าที่หายด้วยศูนย์'],WIND_UNAVAILABLE:['มีสัญญาณ แต่ยังย้อนต้นทางไม่ได้','ลมสงบหรือประวัติลมไม่พอ แจ้งให้ตรวจสอบสัญญาณได้โดยไม่ต้องรอตำแหน่ง'],DIRECTIONAL_ONLY:['ได้เพียงแนวต้นลม ยังระบุตำแหน่งไม่ได้','หลักฐานหลายตำแหน่งยังไม่พอ ไม่วาดจุดต้นเพลิงจากสถานีเดียว'],AMBIGUOUS:['ยังมีหลายพื้นที่ต้นทางที่เป็นไปได้','ดูพื้นที่สีม่วงประกอบสถานีและประวัติลม ไม่ใช่ตำแหน่งต้นเพลิงยืนยัน'],CANDIDATE_AREAS:['พบพื้นที่ที่อธิบายข้อมูลหลายสถานีได้','ใช้เป็นพื้นที่เสนอให้ตรวจสอบ คะแนนยังไม่ใช่ความน่าจะเป็นที่สอบเทียบ'],EXTERNAL_POSSIBLE:['ควันอาจมาจากนอกพื้นที่ศึกษา','ระบบค้นหาเผื่อนอกวง 2 กม. ไม่บังคับต้นทางให้อยู่ในโครงการ'],MODEL_MISMATCH:['แบบจำลองแหล่งเดียวอธิบายข้อมูลไม่ดี','อาจมีหลายแหล่งควัน ลมซับซ้อน หรือข้อมูลผิดพลาด จึงไม่ปักต้นทางจุดเดียว']};
-let spec={preset:'single',windToDeg:75,windSpeedMps:2},fixture=G.generate(P,spec),minute=25,view='dashboard',playing=false,selected='R02',revealed=false,imported=null,packet=null,report=null,ackAt=null,history=[],requestId=0,worker=null,busy=false,prepared=null,incidentMemory=null;
+let spec={preset:'single',windToDeg:75,windSpeedMps:2},fixture=Router.generate(P,spec),minute=25,view='dashboard',playing=false,selected='R02',revealed=false,imported=null,packet=null,report=null,ackAt=null,history=[],requestId=0,worker=null,busy=false,prepared=null,incidentMemory=null;
 function resetIncident(){incidentMemory=null;}
 function rememberIncident(){
  if(report.firstSignalAt){
@@ -31,17 +32,20 @@ class ObservationMap extends window.WildfireMapView{
 }
 const map=new ObservationMap('inverse-map',P,window.WILDFIRE_CONTEXT, id=>{selected=id;render();},point=>{if(view!=='principles'||imported)return;spec.point=point;newScene();});
 function analyze(){
+ window.dispatchEvent(new Event('wildfire-analysis-start'));
  const id=++requestId;clearFailure();busy=true;$('computing').textContent='กำลังคำนวณพื้นที่…';$('export-report').disabled=true;
  packet=imported||fixture.packetAt(minute);
  try{prepared=I.prepareForPlan(packet,P);}catch(e){receive({id,error:e.message});return;}
  const input=packet; $('ack').disabled=true; $('situation').textContent='กำลังวิเคราะห์ข้อมูลชุดใหม่ · ยังไม่ใช้ผลเดิมตัดสินชุดนี้';
- if(worker)worker.postMessage({id,packet:input});else setTimeout(()=>{try{receive({id,result:I.infer(input)});}catch(e){receive({id,error:e.message});}},0);
+ if(worker)Router.send(worker,id,input);else setTimeout(()=>{try{receive({id,result:Router.infer(input)});}catch(e){receive({id,error:e.message});}},0);
 }
 function receive(data){if(data.id!==requestId)return;busy=false;$('computing').textContent='';if(data.error){report=null;fail(data.error);$('situation').textContent='ไม่สามารถประมวลผลชุดข้อมูลนี้ได้';return;}
  report=data.result;rememberIncident();$('export-report').disabled=false;
- const row={asOf:report.asOf,status:report.status,areaKm2:report.cells.length?report.areaKm2:null,support:report.anomalousStations.length};history=history.filter(r=>Date.parse(r.asOf)<Date.parse(row.asOf));history.push(row);if(history.length>61)history.shift();render();
+ const row={asOf:report.asOf,status:report.status,areaKm2:report.cells.length?report.areaKm2:null,support:report.anomalousStations.length};history=history.filter(r=>Date.parse(r.asOf)<Date.parse(row.asOf));history.push(row);if(history.length>61)history.shift();render();window.dispatchEvent(new CustomEvent('wildfire-analysis',{detail:{packet,report}}));
 }
-try{worker=new Worker('./inverse-worker.js');worker.onmessage=e=>receive(e.data);worker.onerror=()=>{worker.terminate();worker=null;analyze();};}catch(_){worker=null;}
+function startWorker(){try{worker=new Worker(Router.path());worker.onmessage=e=>receive(e.data);worker.onerror=()=>{worker.terminate();worker=null;analyze();};}catch(_){worker=null;}}
+startWorker();
+window.addEventListener('wildfire-model-change',()=>{playing=false;if(worker)worker.terminate();startWorker();history=[];if(incidentMemory)incidentMemory.lastAreaAssessment=null;analyze();});
 function seriesChart(station,key,title,unit){
  const rows=(prepared.series.get(station.id)||[]).filter(r=>r.t>=prepared.asOf-600);
  const high=Math.max(key==='pm25'?50:.5,...rows.map(r=>r.valid?r[key]:0)),start=prepared.asOf-600;let d='',pen=false,last=null;
@@ -79,9 +83,9 @@ function render(){if(!report||busy)return;
  revealResult();map.show(report,selected,view==='principles'&&revealed&&!imported?fixture.truth:null);
 }
 function route(){view=location.hash==='#principles'?'principles':'dashboard';playing=false;revealed=false;for(const v of ['dashboard','principles']){$(v).hidden=view!==v;$('nav-'+v).toggleAttribute('aria-current',view===v);if(view===v)$('nav-'+v).setAttribute('aria-current','page');}$('principles-extra').hidden=view!=='principles';$('truth-result').hidden=true;$('truth-result').replaceChildren();$('reveal').textContent='เปิดเฉลยจุดกำเนิดควัน';$('truth-lat').value='';$('truth-lon').value='';$('direction-table').replaceChildren();if(report)map.show(report,selected,null);render();}
-function newScene(){try{fixture=G.generate(P,spec);imported=null;minute=0;playing=false;revealed=false;ackAt=null;history=[];resetIncident();$('reveal').disabled=false;$('direction-table').replaceChildren();analyze();}catch(e){fail(e.message);}}
-$('apply-scene').onclick=()=>{const old=spec;spec={...spec,preset:$('lab-preset').value,windToDeg:Number($('lab-wind').value),windSpeedMps:$('lab-speed').value.trim()?Number($('lab-speed').value):NaN};try{G.generate(P,spec);newScene();}catch(e){spec=old;fail(e.message);}};
-$('apply-truth').onclick=()=>{if(view!=='principles')return;const point={lat:$('truth-lat').value.trim()?Number($('truth-lat').value):NaN,lon:$('truth-lon').value.trim()?Number($('truth-lon').value):NaN};try{G.generate(P,{...spec,point});spec={...spec,point};newScene();}catch(e){fail(e.message);}};
+function newScene(){try{fixture=Router.generate(P,spec);imported=null;minute=0;playing=false;revealed=false;ackAt=null;history=[];resetIncident();$('reveal').disabled=false;$('direction-table').replaceChildren();analyze();}catch(e){fail(e.message);}}
+$('apply-scene').onclick=()=>{const old=spec;spec={...spec,preset:$('lab-preset').value,windToDeg:Number($('lab-wind').value),windSpeedMps:$('lab-speed').value.trim()?Number($('lab-speed').value):NaN};try{Router.generate(P,spec);newScene();}catch(e){spec=old;fail(e.message);}};
+$('apply-truth').onclick=()=>{if(view!=='principles')return;const point={lat:$('truth-lat').value.trim()?Number($('truth-lat').value):NaN,lon:$('truth-lon').value.trim()?Number($('truth-lon').value):NaN};try{Router.generate(P,{...spec,point});spec={...spec,point};newScene();}catch(e){fail(e.message);}};
 $('reveal').onclick=()=>{if(view!=='principles'||imported)return;revealed=!revealed;$('reveal').textContent=revealed?'ซ่อนเฉลย':'เปิดเฉลยจุดกำเนิดควัน';render();};
 $('replay').onclick=()=>{revealed=false;location.hash='dashboard';};
 $('minute').oninput=()=>{playing=false;const next=Number($('minute').value);if(next<minute){ackAt=null;history=[];resetIncident();}minute=next;analyze();};
@@ -90,12 +94,12 @@ $('restart').onclick=()=>{minute=0;playing=false;ackAt=null;history=[];resetInci
 $('ack').onclick=()=>{if(!busy&&report&&incidentMemory?.firstSignalAt&&ackAt===null){ackAt=report.asOf;render();}};
 $('station-table').onclick=e=>{const b=e.target.closest('[data-select]');if(b){selected=b.dataset.select;render();}};
 $('basemap').onchange=()=>map.setBasemap($('basemap').value);
-$('export-report').onclick=()=>{if(report&&!busy)sendDownload('wildfire-observation-only-report.json',{schemaVersion:1,planVersion:P.version,report,assessmentHistory:history,incidentMemory,acknowledgedAt:ackAt,mode:imported?'IMPORTED_UNVERIFIED':'SYNTHETIC_DEMO'});};
+$('export-report').onclick=()=>{if(report&&!busy)sendDownload('wildfire-observation-only-report.json',{schemaVersion:1,planVersion:P.version,algorithm:Router.current(),modelOptions:Router.settings(),report,assessmentHistory:history,incidentMemory,acknowledgedAt:ackAt,mode:imported?'IMPORTED_UNVERIFIED':'SYNTHETIC_DEMO'});};
 $('export-input').onclick=()=>sendDownload('wildfire-observations.json',packet);
 $('import-file').onchange=async()=>{const file=$('import-file').files[0];if(!file)return;try{if(file.size>2*1024*1024)throw Error('ไฟล์ต้องไม่เกิน 2 MB');const data=JSON.parse(await file.text());I.prepareForPlan(data,P);imported=data;ackAt=null;revealed=false;playing=false;history=[];resetIncident();$('reveal').disabled=true;analyze();}catch(e){fail(e.message);}};
-$('compare-winds').onclick=()=>{if(view!=='principles'||imported)return;const names=['เหนือ','ตะวันออกเฉียงเหนือ','ตะวันออก','ตะวันออกเฉียงใต้','ใต้','ตะวันตกเฉียงใต้','ตะวันตก','ตะวันตกเฉียงเหนือ'];$('direction-table').innerHTML=names.map((name,i)=>{const g=G.generate(P,{preset:'single',point:fixture.truth.sources[0],windToDeg:i*45,windSpeedMps:spec.windSpeedMps}),e=I.evidence(I.prepare(g.packetAt(60))),first=e.entries.filter(s=>s.firstSignalAt).sort((a,b)=>a.firstSignalAt.localeCompare(b.firstSignalAt))[0];return '<tr><td>'+name+' '+i*45+'°</td><td>'+(first?P.stations.find(s=>s.id===first.id).screenLabel:'—')+'</td><td>'+(first?f((Date.parse(first.firstSignalAt)-Date.parse(g.truth.smokeReleaseAt))/60000)+' นาที*':'ยังไม่พบตามเกณฑ์ใน 60 นาที')+'</td></tr>';}).join('');};
+$('compare-winds').onclick=()=>{if(view!=='principles'||imported)return;const names=['เหนือ','ตะวันออกเฉียงเหนือ','ตะวันออก','ตะวันออกเฉียงใต้','ใต้','ตะวันตกเฉียงใต้','ตะวันตก','ตะวันตกเฉียงเหนือ'];$('direction-table').innerHTML=names.map((name,i)=>{const g=Router.generate(P,{preset:spec.preset,point:fixture.truth.sources[0],windToDeg:i*45,windSpeedMps:spec.windSpeedMps}),e=I.evidence(I.prepare(g.packetAt(60))),first=e.entries.filter(s=>s.firstSignalAt).sort((a,b)=>a.firstSignalAt.localeCompare(b.firstSignalAt))[0];return '<tr><td>'+name+' '+i*45+'°</td><td>'+(first?P.stations.find(s=>s.id===first.id).screenLabel:'—')+'</td><td>'+(first?f((Date.parse(first.firstSignalAt)-Date.parse(g.truth.smokeReleaseAt))/60000)+' นาที*':'ยังไม่พบตามเกณฑ์ใน 60 นาที')+'</td></tr>';}).join('');};
 window.addEventListener('hashchange',route);document.addEventListener('visibilitychange',()=>{if(document.hidden){playing=false;render();}});
 setInterval(()=>{if(!playing||busy||document.hidden||imported)return;minute=Math.min(60,minute+1);if(minute===60)playing=false;analyze();},1500);
-window.WildfireInverseApp=Object.freeze({getState:()=>JSON.parse(JSON.stringify({view,minute,playing,busy,requestId,report,ackAt,incidentMemory,stationCount:P.stations.length,mode:imported?'IMPORTED_UNVERIFIED':'SYNTHETIC_DEMO'}))});
+window.WildfireInverseApp=Object.freeze({getState:()=>JSON.parse(JSON.stringify({view,minute,playing,busy,requestId,report,algorithm:Router.current(),ackAt,incidentMemory,stationCount:P.stations.length,mode:imported?'IMPORTED_UNVERIFIED':'SYNTHETIC_DEMO'}))});
 route();analyze();
 })();
