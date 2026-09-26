@@ -6,6 +6,7 @@ let choice='baseline',options={},latest=null,comparisonWorker=null,comparisonId=
 const clone=x=>JSON.parse(JSON.stringify(x));
 window.WildfireModelRouter=Object.freeze({
  current:()=>choice,settings:()=>clone(options),
+ useBaseline:()=>{if(choice==='baseline')return;choice='baseline';$('model-choice').value=choice;change();},
  path:()=>choice==='v2a'?'./bayes-worker.js':'./inverse-worker.js',
  send:(worker,id,packet)=>worker.postMessage(choice==='v2a'?{id,packet,options:clone(options)}:{id,packet}),
  infer:packet=>choice==='v2a'?B.infer(packet,options):I.infer(packet),
@@ -25,14 +26,14 @@ function describe(report){
  for(const text of lines){const p=document.createElement('p');p.textContent=text;box.append(p);}
 }
 function change(){invalidate();describe(null);window.dispatchEvent(new Event('wildfire-model-change'));}
-$('model-choice').onchange=()=>{choice=$('model-choice').value;change();};
+$('model-choice').onchange=()=>{if(location.hash!=='#principles'){$('model-choice').value=choice;return;}choice=$('model-choice').value;change();};
 const tbody=$('sensor-models');
 for(const s of P.stations){const tr=document.createElement('tr');tr.dataset.sensorModel=s.id;const label=document.createElement('th');label.scope='row';label.textContent=s.screenLabel;tr.append(label);
  for(const [key,value,min,max,step] of [['pmStd',8,.1,500,.5],['coStd',.06,.001,10,.01],['responseLagSec',0,0,120,5]]){
   const td=document.createElement('td'),input=document.createElement('input');Object.assign(input,{type:'number',value:String(value),min:String(min),max:String(max),step:String(step)});input.dataset.key=key;input.setAttribute('aria-label',s.screenLabel+' '+key);td.append(input);tr.append(td);
  }tbody.append(tr);
 }
-$('apply-sensor-models').onclick=()=>{try{const next={sensorModels:[...tbody.children].map(tr=>{const s={stationId:tr.dataset.sensorModel};for(const el of tr.querySelectorAll('input'))s[el.dataset.key]=el.value.trim()?Number(el.value):NaN;return s;})};B.sensorModels(next,P.stations);options=next;$('sensor-model-error').textContent='';choice='v2a';$('model-choice').value=choice;change();}catch(e){$('sensor-model-error').textContent=e.message;}};
+$('apply-sensor-models').onclick=()=>{if(location.hash!=='#principles')return;try{const next={sensorModels:[...tbody.children].map(tr=>{const s={stationId:tr.dataset.sensorModel};for(const el of tr.querySelectorAll('input'))s[el.dataset.key]=el.value.trim()?Number(el.value):NaN;return s;})};B.sensorModels(next,P.stations);options=next;$('sensor-model-error').textContent='';choice='v2a';$('model-choice').value=choice;change();}catch(e){$('sensor-model-error').textContent=e.message;}};
 $('reset-sensor-models').onclick=()=>{options={};for(const input of tbody.querySelectorAll('input'))input.value=String({pmStd:8,coStd:.06,responseLagSec:0}[input.dataset.key]);$('sensor-model-error').textContent='';if(choice==='v2a')change();};
 window.addEventListener('wildfire-analysis-start',invalidate);
 window.addEventListener('wildfire-analysis',e=>{latest={packet:e.detail.packet,report:e.detail.report};$('compare-models').disabled=false;describe(latest.report);});
