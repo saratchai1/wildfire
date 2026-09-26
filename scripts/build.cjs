@@ -14,3 +14,5 @@ fs.copyFileSync('qa/v2a-benchmark.json',path.join(out,'data/v2a-benchmark.json')
 const assets={};for(const file of ['bayes-engine.js','bayes-worker.js','bayes-panel.js','bayes.css','v2a-simulator.js','data/v2a-benchmark.json','index.html','inverse-engine.js','inverse-worker.js','inverse-simulator.js','inverse-ui.js','inverse.css'])assets[file]=crypto.createHash('sha256').update(fs.readFileSync(path.join(out,file))).digest('hex');
 fs.writeFileSync(path.join(out,'version.json'),JSON.stringify({sourceCommit:process.env.GITHUB_SHA||'local',appVersion:'inverse-source-v2a',challengerVersion:require('../bayes-engine.js').VERSION,defaultAlgorithm:'baseline',modelVersion:I.VERSION,planVersion:plan.version,stationCount:plan.stations.length,primaryViews:['dashboard','principles'],mode:'SYNTHETIC_OR_IMPORTED_OBSERVATIONS_NOT_LIVE',fieldValidated:false,assets,generatedAt:new Date().toISOString()},null,2));
 console.log('Built observation-only inverse dashboard and blind lab; all ten stations and previous tools preserved.');
+
+require('./build_terrain.cjs');
